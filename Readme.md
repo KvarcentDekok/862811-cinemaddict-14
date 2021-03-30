@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Павел Хапрянинов](https://up.htmlacademy.ru/ecmascript/14/user/862811).
-* Наставник: `Неизвестно`.
+* Наставник: [Сергей Вохмянин](https://up.htmlacademy.ru/ecmascript/14/user/530823).
 
 ---
 
