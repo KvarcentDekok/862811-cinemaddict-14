@@ -1,3 +1,3 @@
-export const createStatisticsTemplate = () => {
-  return '<p>130 291 movies inside</p>';
+export const createStatisticsTemplate = (moviesCount) => {
+  return `<p>${moviesCount.toLocaleString()} movies inside</p>`;
 };
