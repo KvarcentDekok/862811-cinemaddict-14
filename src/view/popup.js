@@ -1,5 +1,4 @@
-import {humanizeReleaseDate} from '../utils.js';
-import {humanizeCommentDate, humanizeDuration} from '../utils';
+import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration, createElement} from '../utils.js';
 
 const createGenresTemplate = (genres) => {
   return genres.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('');
@@ -23,7 +22,7 @@ const createCommentsTemplate = (commentsArray) => {
   ).join('');
 };
 
-export const createPopupTemplate = (film, commentsArray) => {
+const createPopupTemplate = (film, commentsArray) => {
   const {
     title,
     originalTitle,
@@ -161,3 +160,36 @@ export const createPopupTemplate = (film, commentsArray) => {
   </form>
 </section>`;
 };
+
+export default class Popup {
+  constructor(film, commentsArray) {
+    this._element = null;
+    this._film = film;
+    this._commentsArray = commentsArray;
+    this._closeButton = null;
+  }
+
+  getTemplate() {
+    return createPopupTemplate(this._film, this._commentsArray);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  getCloseButton() {
+    if (!this._closeButton) {
+      this._closeButton = this._element.querySelector('.film-details__close-btn');
+    }
+
+    return this._closeButton;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

@@ -3,6 +3,33 @@ import duration from 'dayjs/plugin/duration.js';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import {DESCRIPTION_LIMIT} from './const.js';
 
+export const RenderPosition = {
+  AFTERBEGIN: 'afterbegin',
+  BEFOREEND: 'beforeend',
+};
+
+export const render = (container, element, place) => {
+  switch (place) {
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(element);
+      break;
+    default:
+      container.append(element);
+      break;
+  }
+};
+
+export const createElement = (template) => {
+  const newElement = document.createElement('div');
+
+  newElement.innerHTML = template;
+
+  return newElement.firstChild;
+};
+
 export const getRandomInteger = (a = 0, b = 1) => {
   const lower = Math.ceil(Math.min(a, b));
   const upper = Math.floor(Math.max(a, b));
@@ -11,11 +38,7 @@ export const getRandomInteger = (a = 0, b = 1) => {
 };
 
 export const getRandomElementFromArray = (array) => {
-  let randomIndex = getRandomInteger(0, array.length - 1);
-
-  while (array[randomIndex] === undefined) {
-    randomIndex = getRandomInteger(0, array.length - 1);
-  }
+  const randomIndex = getRandomInteger(0, array.length - 1);
 
   return array[randomIndex];
 };
@@ -35,9 +58,9 @@ export const humanizeDuration = (durationTime) => {
 export const limitText = (text) => {
   if (text.length <= DESCRIPTION_LIMIT) {
     return text;
-  } else {
-    return `${text.slice(0, DESCRIPTION_LIMIT)}…`;
   }
+
+  return `${text.slice(0, DESCRIPTION_LIMIT)}…`;
 };
 
 export const humanizeReleaseDate = (date) => {

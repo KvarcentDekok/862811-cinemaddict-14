@@ -1,8 +1,8 @@
-import {getComponentFromDate, humanizeDuration, limitText} from '../utils.js';
+import {getComponentFromDate, humanizeDuration, limitText, createElement} from '../utils.js';
 
 const ACTIVE_CONTROL_CLASS = 'film-card__controls-item--active';
 
-export const createFilmTemplate = (film) => {
+const createFilmTemplate = (film) => {
   const {title, rating, releaseDate, runtime, genres, poster, description} = film.info;
   const {comments} = film;
   const {watchlist, watched, favorite} = film.user;
@@ -34,3 +34,53 @@ export const createFilmTemplate = (film) => {
           </div>
         </article>`;
 };
+
+export default class Film {
+  constructor(film) {
+    this._element = null;
+    this._film = film;
+    this._posterElement = null;
+    this._titleElement = null;
+    this._commentsElement = null;
+  }
+
+  getTemplate() {
+    return createFilmTemplate(this._film);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  getPosterElement() {
+    if (!this._posterElement) {
+      this._posterElement = this._element.querySelector('.film-card__poster');
+    }
+
+    return this._posterElement;
+  }
+
+  getTitleElement() {
+    if (!this._titleElement) {
+      this._titleElement = this._element.querySelector('.film-card__title');
+    }
+
+    return this._titleElement;
+  }
+
+  getCommentsElement() {
+    if (!this._commentsElement) {
+      this._commentsElement = this._element.querySelector('.film-card__comments');
+    }
+
+    return this._commentsElement;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

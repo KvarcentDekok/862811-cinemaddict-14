@@ -61,7 +61,7 @@ const generateGenres = () => {
   return new Array(genresCount).fill().map(() => {
     const randomGenre = getRandomElementFromArray(genres);
 
-    delete genres[genres.indexOf(randomGenre)];
+    genres.splice(genres.indexOf(randomGenre), 1);
 
     return randomGenre;
   });
@@ -82,7 +82,7 @@ const generateCommentsId = () => {
   return new Array(commentsNumber).fill().map(() => {
     const randomId = getRandomElementFromArray(commentsId);
 
-    delete commentsId[commentsId.indexOf(randomId)];
+    commentsId.splice(commentsId.indexOf(randomId), 1);
 
     return randomId;
   });
