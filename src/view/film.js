@@ -58,7 +58,11 @@ export default class Film {
 
   getPosterElement() {
     if (!this._posterElement) {
-      this._posterElement = this._element.querySelector('.film-card__poster');
+      if (!this._element) {
+        this._posterElement = this.getElement().querySelector('.film-card__poster');
+      } else {
+        this._posterElement = this._element.querySelector('.film-card__poster');
+      }
     }
 
     return this._posterElement;
@@ -66,7 +70,11 @@ export default class Film {
 
   getTitleElement() {
     if (!this._titleElement) {
-      this._titleElement = this._element.querySelector('.film-card__title');
+      if (!this._element) {
+        this._titleElement = this.getElement().querySelector('.film-card__title');
+      } else {
+        this._titleElement = this._element.querySelector('.film-card__title');
+      }
     }
 
     return this._titleElement;
@@ -74,7 +82,11 @@ export default class Film {
 
   getCommentsElement() {
     if (!this._commentsElement) {
-      this._commentsElement = this._element.querySelector('.film-card__comments');
+      if (!this._element) {
+        this._commentsElement = this.getElement().querySelector('.film-card__comments');
+      } else {
+        this._commentsElement = this._element.querySelector('.film-card__comments');
+      }
     }
 
     return this._commentsElement;
@@ -82,5 +94,8 @@ export default class Film {
 
   removeElement() {
     this._element = null;
+    this._posterElement = null;
+    this._titleElement = null;
+    this._commentsElement = null;
   }
 }

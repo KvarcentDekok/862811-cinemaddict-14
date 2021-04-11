@@ -183,7 +183,11 @@ export default class Popup {
 
   getCloseButton() {
     if (!this._closeButton) {
-      this._closeButton = this._element.querySelector('.film-details__close-btn');
+      if (!this._element) {
+        this._closeButton = this.getElement().querySelector('.film-details__close-btn');
+      } else {
+        this._closeButton = this._element.querySelector('.film-details__close-btn');
+      }
     }
 
     return this._closeButton;
@@ -191,5 +195,6 @@ export default class Popup {
 
   removeElement() {
     this._element = null;
+    this._closeButton = null;
   }
 }

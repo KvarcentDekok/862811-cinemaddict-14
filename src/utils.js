@@ -85,6 +85,36 @@ export const getComments = (commentsId, commentsArray) => {
   return comments;
 };
 
+export const getTopRatedMovies = (movies) => {
+  const topRatedMovies = [];
+  const sortedMovies = [...movies].sort((a, b) => {
+    return Number(b.info.rating) - Number(a.info.rating);
+  });
+
+  for (const movie of sortedMovies) {
+    if (Number(movie.info.rating)) {
+      topRatedMovies.push(movie);
+    }
+  }
+
+  return topRatedMovies;
+};
+
+export const getMostCommentedMovies = (movies) => {
+  const mostCommentedMovies = [];
+  const sortedMovies = [...movies].sort((a, b) => {
+    return b.comments.length - a.comments.length;
+  });
+
+  for (const movie of sortedMovies) {
+    if (movie.comments.length) {
+      mostCommentedMovies.push(movie);
+    }
+  }
+
+  return mostCommentedMovies;
+};
+
 export const capitalize = (string) => {
   return `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 };

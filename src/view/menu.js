@@ -29,7 +29,11 @@ export default class Menu {
 
   getNavigationContainer() {
     if (!this._navigationContainer) {
-      this._navigationContainer = this._element.querySelector('.main-navigation__items');
+      if (!this._element) {
+        this._navigationContainer = this.getElement().querySelector('.main-navigation__items');
+      } else {
+        this._navigationContainer = this._element.querySelector('.main-navigation__items');
+      }
     }
 
     return this._navigationContainer;
@@ -37,5 +41,6 @@ export default class Menu {
 
   removeElement() {
     this._element = null;
+    this._navigationContainer = null;
   }
 }
