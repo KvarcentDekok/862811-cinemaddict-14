@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract.js';
 
 const createMenuTemplate = () => {
   return `<nav class="main-navigation">
@@ -9,9 +9,10 @@ const createMenuTemplate = () => {
   </nav>`;
 };
 
-export default class Menu {
+export default class Menu extends AbstractView {
   constructor() {
-    this._element = null;
+    super();
+
     this._navigationContainer = null;
   }
 
@@ -19,28 +20,17 @@ export default class Menu {
     return createMenuTemplate();
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
   getNavigationContainer() {
     if (!this._navigationContainer) {
-      if (!this._element) {
-        this._navigationContainer = this.getElement().querySelector('.main-navigation__items');
-      } else {
-        this._navigationContainer = this._element.querySelector('.main-navigation__items');
-      }
+      this._navigationContainer = this.getElement().querySelector('.main-navigation__items');
     }
 
     return this._navigationContainer;
   }
 
   removeElement() {
-    this._element = null;
+    super.removeElement();
+
     this._navigationContainer = null;
   }
 }

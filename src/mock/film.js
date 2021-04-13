@@ -1,4 +1,4 @@
-import {getRandomElementFromArray, getRandomInteger} from '../utils.js';
+import {getRandomElementFromArray, getRandomInteger} from '../utils/common.js';
 import {names, surnames} from './common.js';
 import dayjs from 'dayjs';
 

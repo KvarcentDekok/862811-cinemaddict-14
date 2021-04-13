@@ -1,4 +1,5 @@
-import {getComponentFromDate, humanizeDuration, limitText, createElement} from '../utils.js';
+import {getComponentFromDate, humanizeDuration, limitText} from '../utils/films.js';
+import AbstractView from './abstract.js';
 
 const ACTIVE_CONTROL_CLASS = 'film-card__controls-item--active';
 
@@ -35,65 +36,80 @@ const createFilmTemplate = (film) => {
         </article>`;
 };
 
-export default class Film {
+export default class Film extends AbstractView {
   constructor(film) {
-    this._element = null;
+    super();
+
     this._film = film;
     this._posterElement = null;
     this._titleElement = null;
     this._commentsElement = null;
+    this._posterClickHandler = this._posterClickHandler.bind(this);
+    this._titleClickHandler = this._titleClickHandler.bind(this);
+    this._commentsClickHandler = this._commentsClickHandler.bind(this);
   }
 
   getTemplate() {
     return createFilmTemplate(this._film);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  getPosterElement() {
+  _getPosterElement() {
     if (!this._posterElement) {
-      if (!this._element) {
-        this._posterElement = this.getElement().querySelector('.film-card__poster');
-      } else {
-        this._posterElement = this._element.querySelector('.film-card__poster');
-      }
+      this._posterElement = this.getElement().querySelector('.film-card__poster');
     }
 
     return this._posterElement;
   }
 
-  getTitleElement() {
+  _getTitleElement() {
     if (!this._titleElement) {
-      if (!this._element) {
-        this._titleElement = this.getElement().querySelector('.film-card__title');
-      } else {
-        this._titleElement = this._element.querySelector('.film-card__title');
-      }
+      this._titleElement = this.getElement().querySelector('.film-card__title');
     }
 
     return this._titleElement;
   }
 
-  getCommentsElement() {
+  _getCommentsElement() {
     if (!this._commentsElement) {
-      if (!this._element) {
-        this._commentsElement = this.getElement().querySelector('.film-card__comments');
-      } else {
-        this._commentsElement = this._element.querySelector('.film-card__comments');
-      }
+      this._commentsElement = this.getElement().querySelector('.film-card__comments');
     }
 
     return this._commentsElement;
   }
 
+  _posterClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.posterClick();
+  }
+
+  setPosterClickHandler(callback) {
+    this._callback.posterClick = callback;
+    this._getPosterElement().addEventListener('click', this._posterClickHandler);
+  }
+
+  _titleClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.titleClick();
+  }
+
+  setTitleClickHandler(callback) {
+    this._callback.titleClick = callback;
+    this._getTitleElement().addEventListener('click', this._titleClickHandler);
+  }
+
+  _commentsClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.commentsClick();
+  }
+
+  setCommentsClickHandler(callback) {
+    this._callback.commentsClick = callback;
+    this._getCommentsElement().addEventListener('click', this._commentsClickHandler);
+  }
+
   removeElement() {
-    this._element = null;
+    super.removeElement();
+
     this._posterElement = null;
     this._titleElement = null;
     this._commentsElement = null;

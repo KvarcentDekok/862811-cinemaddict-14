@@ -1,4 +1,5 @@
-import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration, createElement} from '../utils.js';
+import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration} from '../utils/films.js';
+import AbstractView from './abstract.js';
 
 const createGenresTemplate = (genres) => {
   return genres.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('');
@@ -161,40 +162,41 @@ const createPopupTemplate = (film, commentsArray) => {
 </section>`;
 };
 
-export default class Popup {
+export default class Popup extends AbstractView{
   constructor(film, commentsArray) {
-    this._element = null;
+    super();
+
     this._film = film;
     this._commentsArray = commentsArray;
     this._closeButton = null;
+    this._closeButtonClickHandler = this._closeButtonClickHandler.bind(this);
   }
 
   getTemplate() {
     return createPopupTemplate(this._film, this._commentsArray);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  getCloseButton() {
+  _getCloseButton() {
     if (!this._closeButton) {
-      if (!this._element) {
-        this._closeButton = this.getElement().querySelector('.film-details__close-btn');
-      } else {
-        this._closeButton = this._element.querySelector('.film-details__close-btn');
-      }
+      this._closeButton = this.getElement().querySelector('.film-details__close-btn');
     }
 
     return this._closeButton;
   }
 
+  _closeButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeButtonClick();
+  }
+
+  setCloseButtonClickHandler(callback) {
+    this._callback.closeButtonClick = callback;
+    this._getCloseButton().addEventListener('click', this._closeButtonClickHandler);
+  }
+
   removeElement() {
-    this._element = null;
+    super.removeElement();
+
     this._closeButton = null;
   }
 }

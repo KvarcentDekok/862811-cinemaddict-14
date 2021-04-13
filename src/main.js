@@ -15,7 +15,8 @@ import {generateFilm} from './mock/film.js';
 import {generateComment} from './mock/comment.js';
 import {generateFilter} from './mock/filter';
 import {generateProfileRating} from './mock/profile-rating';
-import {getComments, render, getMostCommentedMovies, getTopRatedMovies} from './utils.js';
+import {getComments, getMostCommentedMovies, getTopRatedMovies} from './utils/films.js';
+import {render} from './utils/render.js';
 
 const ALL_MOVIES_COUNT = 20;
 const SHOW_MOVIES_COUNT = 5;
@@ -50,11 +51,11 @@ const renderFilm = (container, movie) => {
   const popupComponent = new PopupView(movie, popupComments);
 
   const showPopup = () => {
-    popupComponent.getCloseButton().addEventListener('click', () => {
+    popupComponent.setCloseButtonClickHandler(() => {
       closePopup();
     });
 
-    render(document.body, popupComponent.getElement());
+    render(document.body, popupComponent);
     document.body.classList.add(HIDE_OVERFLOW_CLASS);
     document.addEventListener('keydown', onEscKeyDown);
   };
@@ -73,15 +74,15 @@ const renderFilm = (container, movie) => {
     }
   };
 
-  movieComponent.getPosterElement().addEventListener('click', () => {
+  movieComponent.setPosterClickHandler(() => {
     showPopup();
   });
 
-  movieComponent.getTitleElement().addEventListener('click', () => {
+  movieComponent.setTitleClickHandler(() => {
     showPopup();
   });
 
-  movieComponent.getCommentsElement().addEventListener('click', () => {
+  movieComponent.setCommentsClickHandler(() => {
     showPopup();
   });
 
@@ -105,27 +106,27 @@ const showMoreMovies = (evt) => {
 };
 
 const renderContainers = () => {
-  render(headerElement, profileComponent.getElement());
-  render(mainElement,  new SortView().getElement());
-  render(mainElement, contentComponent.getElement());
-  render(contentComponent.getElement(), allMoviesComponent.getElement());
+  render(headerElement, profileComponent);
+  render(mainElement,  new SortView());
+  render(mainElement, contentComponent);
+  render(contentComponent, allMoviesComponent);
 
   for (let i = 0; i < Math.min(movies.length, SHOW_MOVIES_COUNT); i++) {
     renderFilm(allMoviesComponent.getContainer(), movies[i]);
   }
 
   if (movies.length > SHOW_MOVIES_COUNT) {
-    const showMoreButton = new ShowMoreButtonView().getElement();
+    const showMoreButtonComponent = new ShowMoreButtonView();
 
-    render(contentComponent.getElement(), showMoreButton);
+    render(contentComponent, showMoreButtonComponent);
 
-    showMoreButton.addEventListener('click', (evt) => {
+    showMoreButtonComponent.setButtonClickHandler((evt) => {
       showMoreMovies(evt);
     });
   }
 
   if (topRatedMovies.length) {
-    render(contentComponent.getElement(), topRatedComponent.getElement());
+    render(contentComponent, topRatedComponent);
 
     for (let i = 0; i < Math.min(topRatedMovies.length, EXTRA_MOVIES_COUNT); i++) {
       renderFilm(topRatedComponent.getContainer(), topRatedMovies[i]);
@@ -133,7 +134,7 @@ const renderContainers = () => {
   }
 
   if (mostCommentedMovies.length) {
-    render(contentComponent.getElement(), mostCommentedComponent.getElement());
+    render(contentComponent, mostCommentedComponent);
 
     for (let i = 0; i < Math.min(mostCommentedMovies.length, EXTRA_MOVIES_COUNT); i++) {
       renderFilm(mostCommentedComponent.getContainer(), mostCommentedMovies[i]);
@@ -141,19 +142,19 @@ const renderContainers = () => {
   }
 };
 
-render(mainElement, menuComponent.getElement());
+render(mainElement, menuComponent);
 
 filters.forEach((filter) => {
   const filterComponent = new FilterView(filter);
 
-  render(menuComponent.getNavigationContainer(), filterComponent.getElement());
+  render(menuComponent.getNavigationContainer(), filterComponent);
 });
 
 if (movies.length) {
   renderContainers();
 } else {
-  render(mainElement, contentComponent.getElement());
-  render(contentComponent.getElement(), noFilmsComponent.getElement());
+  render(mainElement, contentComponent);
+  render(contentComponent, noFilmsComponent);
 }
 
-render(statisticsContainer, statisticsComponent.getElement());
+render(statisticsContainer, statisticsComponent);

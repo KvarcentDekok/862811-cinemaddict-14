@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract.js';
 
 const createTopRatedSectionTemplate = () => {
   return `<section class="films-list films-list--extra">
@@ -8,9 +8,10 @@ const createTopRatedSectionTemplate = () => {
   </section>`;
 };
 
-export default class TopRatedSection {
+export default class TopRatedSection extends AbstractView {
   constructor() {
-    this._element = null;
+    super();
+
     this._container = null;
   }
 
@@ -18,28 +19,17 @@ export default class TopRatedSection {
     return createTopRatedSectionTemplate();
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
   getContainer() {
     if (!this._container) {
-      if (!this._element) {
-        this._container =  this.getElement().querySelector('.films-list__container');
-      } else {
-        this._container =  this._element.querySelector('.films-list__container');
-      }
+      this._container =  this.getElement().querySelector('.films-list__container');
     }
 
     return this._container;
   }
 
   removeElement() {
-    this._element = null;
+    super.removeElement();
+
     this._container = null;
   }
 }
