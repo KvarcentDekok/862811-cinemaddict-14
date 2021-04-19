@@ -1,4 +1,4 @@
-import Abstract from '../view/abstract.js';
+import Base from '../view/base.js';
 
 export const RenderPosition = {
   AFTERBEGIN: 'afterbegin',
@@ -6,11 +6,11 @@ export const RenderPosition = {
 };
 
 export const render = (container, element, place) => {
-  if (container instanceof Abstract) {
+  if (container instanceof Base) {
     container = container.getElement();
   }
 
-  if (element instanceof Abstract) {
+  if (element instanceof Base) {
     element = element.getElement();
   }
   switch (place) {
@@ -32,4 +32,22 @@ export const createElement = (template) => {
   newElement.innerHTML = template;
 
   return newElement.firstChild;
+};
+
+export const replace = (newChild, oldChild) => {
+  if (oldChild instanceof Base) {
+    oldChild = oldChild.getElement();
+  }
+
+  if (newChild instanceof Base) {
+    newChild = newChild.getElement();
+  }
+
+  const parent = oldChild.parentElement;
+
+  if (parent === null || newChild === null) {
+    throw new Error('Can\'t replace unexisting elements');
+  }
+
+  parent.replaceChild(newChild, oldChild);
 };

@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createTopRatedSectionTemplate = () => {
   return `<section class="films-list films-list--extra">
@@ -8,7 +8,7 @@ const createTopRatedSectionTemplate = () => {
   </section>`;
 };
 
-export default class TopRatedSection extends AbstractView {
+export default class TopRatedSection extends BaseView {
   constructor() {
     super();
 

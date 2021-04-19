@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createProfileTemplate = (profileRating) => {
   return `<section class="header__profile profile">
@@ -7,7 +7,7 @@ const createProfileTemplate = (profileRating) => {
   </section>`;
 };
 
-export default class Profile extends AbstractView {
+export default class Profile extends BaseView {
   constructor(profileRating) {
     super();
 

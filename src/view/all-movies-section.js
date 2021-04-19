@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createAllMoviesSectionTemplate = () => {
   return `<section class="films-list">
@@ -8,7 +8,7 @@ const createAllMoviesSectionTemplate = () => {
     </section>`;
 };
 
-export default class AllMoviesSection extends AbstractView {
+export default class AllMoviesSection extends BaseView {
   constructor() {
     super();
 

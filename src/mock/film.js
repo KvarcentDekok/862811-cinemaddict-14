@@ -1,6 +1,7 @@
 import {getRandomElementFromArray, getRandomInteger} from '../utils/common.js';
 import {names, surnames} from './common.js';
 import dayjs from 'dayjs';
+import {nanoid} from 'nanoid';
 
 const MIN_SENTENCES_COUNT = 1;
 const MAX_SENTENCES_COUNT = 5;
@@ -94,6 +95,7 @@ export const generateFilm = () => {
   const releaseDate = dayjs(getRandomInteger(0, +dayjs())).format();
 
   return {
+    id: nanoid(),
     info: {
       title,
       originalTitle: title,

@@ -1,10 +1,10 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createStatisticsTemplate = (moviesCount) => {
   return `<p>${moviesCount.toLocaleString()} movies inside</p>`;
 };
 
-export default class Statistics extends AbstractView {
+export default class Statistics extends BaseView {
   constructor(moviesCount) {
     super();
 

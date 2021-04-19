@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createNoFilmsTemplate = () => {
   return `<section class="films-list">
@@ -6,7 +6,7 @@ const createNoFilmsTemplate = () => {
     </section>`;
 };
 
-export default class NoFilms extends AbstractView {
+export default class NoFilms extends BaseView {
   getTemplate() {
     return createNoFilmsTemplate();
   }

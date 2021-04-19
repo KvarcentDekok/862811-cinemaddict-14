@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createMenuTemplate = () => {
   return `<nav class="main-navigation">
@@ -9,7 +9,7 @@ const createMenuTemplate = () => {
   </nav>`;
 };
 
-export default class Menu extends AbstractView {
+export default class Menu extends BaseView {
   constructor() {
     super();
 

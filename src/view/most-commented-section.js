@@ -1,4 +1,4 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createMostCommentedSectionTemplate = () => {
   return `<section class="films-list films-list--extra">
@@ -8,7 +8,7 @@ const createMostCommentedSectionTemplate = () => {
   </section>`;
 };
 
-export default class MostCommentedSection extends AbstractView {
+export default class MostCommentedSection extends BaseView {
   constructor() {
     super();
 

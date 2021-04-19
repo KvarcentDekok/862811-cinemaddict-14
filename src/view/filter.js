@@ -1,5 +1,5 @@
 import {capitalize} from '../utils/common.js';
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createFilterTemplate = (filter) => {
   const {name, count} = filter;
@@ -9,7 +9,7 @@ const createFilterTemplate = (filter) => {
 </a>`;
 };
 
-export default class Filter extends AbstractView {
+export default class Filter extends BaseView {
   constructor(filter) {
     super();
 

@@ -1,5 +1,6 @@
 import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration} from '../utils/films.js';
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
+import {FilmCardCalls} from '../const.js';
 
 const createGenresTemplate = (genres) => {
   return genres.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('');
@@ -108,13 +109,16 @@ const createPopupTemplate = (film, commentsArray) => {
       </div>
 
       <section class="film-details__controls">
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${watchlist ? 'checked' : ''}>
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" 
+        data-call="${FilmCardCalls.WATCHLIST}" ${watchlist ? 'checked' : ''}>
         <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${watched ? 'checked' : ''}>
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" 
+        data-call="${FilmCardCalls.WATCHED}" ${watched ? 'checked' : ''}>
         <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${favorite ? 'checked' : ''}>
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" 
+        data-call="${FilmCardCalls.FAVORITE}" ${favorite ? 'checked' : ''}>
         <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
       </section>
     </div>
@@ -162,26 +166,18 @@ const createPopupTemplate = (film, commentsArray) => {
 </section>`;
 };
 
-export default class Popup extends AbstractView{
+export default class Popup extends BaseView{
   constructor(film, commentsArray) {
     super();
 
     this._film = film;
     this._commentsArray = commentsArray;
-    this._closeButton = null;
     this._closeButtonClickHandler = this._closeButtonClickHandler.bind(this);
+    this._controlsChangeHandler = this._controlsChangeHandler.bind(this);
   }
 
   getTemplate() {
     return createPopupTemplate(this._film, this._commentsArray);
-  }
-
-  _getCloseButton() {
-    if (!this._closeButton) {
-      this._closeButton = this.getElement().querySelector('.film-details__close-btn');
-    }
-
-    return this._closeButton;
   }
 
   _closeButtonClickHandler(evt) {
@@ -191,12 +187,18 @@ export default class Popup extends AbstractView{
 
   setCloseButtonClickHandler(callback) {
     this._callback.closeButtonClick = callback;
-    this._getCloseButton().addEventListener('click', this._closeButtonClickHandler);
+    this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closeButtonClickHandler);
   }
 
-  removeElement() {
-    super.removeElement();
+  _controlsChangeHandler(evt) {
+    if (evt.target.dataset.call) {
+      evt.preventDefault();
+      this._callback.controlsChange(evt.target.dataset.call);
+    }
+  }
 
-    this._closeButton = null;
+  setControlsChangeHandler(callback) {
+    this._callback.controlsChange = callback;
+    this.getElement().querySelector('.film-details__controls').addEventListener('change', this._controlsChangeHandler);
   }
 }

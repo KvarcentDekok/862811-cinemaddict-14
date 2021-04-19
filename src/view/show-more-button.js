@@ -1,10 +1,10 @@
-import AbstractView from './abstract.js';
+import BaseView from './base.js';
 
 const createShowMoreButtonTemplate = () => {
   return '<button class="films-list__show-more">Show more</button>';
 };
 
-export default class ShowMoreButton extends AbstractView {
+export default class ShowMoreButton extends BaseView {
   constructor() {
     super();
 
