@@ -9,7 +9,7 @@ import {generateFilter} from './mock/filter';
 import {generateProfileRating} from './mock/profile-rating';
 import {render} from './utils/render.js';
 
-const ALL_MOVIES_COUNT = 5;
+const ALL_MOVIES_COUNT = 20;
 const MAX_COMMENTS_COUNT = 5;
 
 const movies = new Array(ALL_MOVIES_COUNT).fill().map(generateFilm);

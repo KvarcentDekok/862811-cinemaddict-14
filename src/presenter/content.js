@@ -133,12 +133,10 @@ export default class Content {
     }
   }
 
-  _createMovieComponents(movie) {
-    this._movieComponent = new FilmView(movie);
-    this._movieComponentTopRated = new FilmView(movie);
-    this._movieComponentMostCommented = new FilmView(movie);
+  _createMovieComponent(movie) {
+    const filmComponent = new FilmView(movie);
 
-    this._movieComponent.setCardClickHandler((call) => {
+    filmComponent.setCardClickHandler((call) => {
       if (call === FilmCardCalls.POPUP) {
         this._showPopup(movie);
       } else {
@@ -146,54 +144,43 @@ export default class Content {
       }
     });
 
-    this._movieComponentTopRated.setCardClickHandler((call) => {
-      if (call === FilmCardCalls.POPUP) {
-        this._showPopup(movie);
-      } else {
-        this._onButtonsClick(movie, call);
-      }
-    });
-
-    this._movieComponentMostCommented.setCardClickHandler((call) => {
-      if (call === FilmCardCalls.POPUP) {
-        this._showPopup(movie);
-      } else {
-        this._onButtonsClick(movie, call);
-      }
-    });
+    return filmComponent;
   }
 
   _renderFilm(container, movie, options = {isTopRated: false, isMostCommented: false}) {
-    this._createMovieComponents(movie);
+    const filmComponent = this._createMovieComponent(movie);
+
+    render(container, filmComponent);
 
     if (options.isTopRated) {
-      render(container, this._movieComponentTopRated);
-      this._movieComponents.topRated[movie.id] = this._movieComponentTopRated;
+      this._movieComponents.topRated[movie.id] = filmComponent;
     } else if (options.isMostCommented) {
-      render(container, this._movieComponentMostCommented);
-      this._movieComponents.mostCommented[movie.id] = this._movieComponentMostCommented;
+      this._movieComponents.mostCommented[movie.id] = filmComponent;
     } else {
-      render(container, this._movieComponent);
-      this._movieComponents[movie.id] = this._movieComponent;
+      this._movieComponents[movie.id] = filmComponent;
     }
   }
 
   _replaceFilm(movie) {
-    this._createMovieComponents(movie);
-
     if (this._movieComponents[movie.id]) {
-      replace(this._movieComponent, this._movieComponents[movie.id]);
-      this._movieComponents[movie.id] = this._movieComponent;
+      const filmComponent = this._createMovieComponent(movie);
+
+      replace(filmComponent, this._movieComponents[movie.id]);
+      this._movieComponents[movie.id] = filmComponent;
     }
 
     if (this._movieComponents.topRated[movie.id]) {
-      replace(this._movieComponentTopRated, this._movieComponents.topRated[movie.id]);
-      this._movieComponents.topRated[movie.id] = this._movieComponentTopRated;
+      const filmComponent = this._createMovieComponent(movie);
+
+      replace(filmComponent, this._movieComponents.topRated[movie.id]);
+      this._movieComponents.topRated[movie.id] = filmComponent;
     }
 
     if (this._movieComponents.mostCommented[movie.id]) {
-      replace(this._movieComponentMostCommented, this._movieComponents.mostCommented[movie.id]);
-      this._movieComponents.mostCommented[movie.id] = this._movieComponentMostCommented;
+      const filmComponent = this._createMovieComponent(movie);
+
+      replace(filmComponent, this._movieComponents.mostCommented[movie.id]);
+      this._movieComponents.mostCommented[movie.id] = filmComponent;
     }
   }
 
