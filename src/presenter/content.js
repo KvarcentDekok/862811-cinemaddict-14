@@ -8,9 +8,9 @@ import MostCommentedSectionView from '../view/most-commented-section.js';
 import PopupView from '../view/popup.js';
 import NoFilmsView from '../view/no-films.js';
 import {render, replace} from '../utils/render.js';
-import {getComments, getMostCommentedMovies, getTopRatedMovies} from '../utils/films.js';
+import {getComments, getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} from '../utils/films.js';
 import {updateItem} from '../utils/common.js';
-import {FilmCardCalls} from '../const.js';
+import {FilmCardCall, SortType} from '../const.js';
 
 const SHOW_MOVIES_COUNT = 5;
 const EXTRA_MOVIES_COUNT = 2;
@@ -20,6 +20,7 @@ export default class Content {
   constructor(contentParent) {
     this._contentParent = contentParent;
     this._shownMoviesCount = SHOW_MOVIES_COUNT;
+    this._currentSortType = SortType.DEFAULT;
 
     this._contentComponent = new ContentView();
     this._sortComponent = new SortView();
@@ -31,6 +32,7 @@ export default class Content {
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._onFilmChange = this._onFilmChange.bind(this);
+    this._onSortTypeChange = this._onSortTypeChange.bind(this);
   }
 
   init(movies, comments) {
@@ -38,6 +40,7 @@ export default class Content {
     this._comments = comments.slice();
     this._topRatedMovies = getTopRatedMovies(this._movies);
     this._mostCommentedMovies = getMostCommentedMovies(this._movies);
+    this._sourcedMovies = movies.slice();
     this._movieComponents = {};
     this._movieComponents.topRated = {};
     this._movieComponents.mostCommented = {};
@@ -55,14 +58,10 @@ export default class Content {
   }
 
   _renderContainers() {
-    render(this._contentParent,  this._sortComponent);
+    this._renderSort();
     render(this._contentParent, this._contentComponent);
     render(this._contentComponent, this._allMoviesSectionComponent);
     this._renderAllFilms();
-
-    if (this._movies.length > SHOW_MOVIES_COUNT) {
-      this._renderShowMoreButton();
-    }
 
     if (this._topRatedMovies.length) {
       this._renderTopRatedFilms();
@@ -73,12 +72,54 @@ export default class Content {
     }
   }
 
+  _renderSort() {
+    render(this._contentParent,  this._sortComponent);
+    this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
+  }
+
   _renderShowMoreButton() {
-    render(this._contentComponent, this._showMoreButtonComponent);
+    render(this._allMoviesSectionComponent, this._showMoreButtonComponent, 'after-element');
 
     this._showMoreButtonComponent.setButtonClickHandler((evt) => {
       this._showMoreMovies(evt);
     });
+  }
+
+  _sortFilms(sortType) {
+    switch (sortType) {
+      case SortType.DATE:
+        this._movies.sort(sortByDate);
+        break;
+      case SortType.RATING:
+        this._movies.sort(sortByRating);
+        break;
+      default:
+        this._movies = this._sourcedMovies.slice();
+    }
+
+    this._currentSortType = sortType;
+  }
+
+  _clearFilms() {
+    Object.values(this._movieComponents).forEach((value) => {
+      if (value instanceof FilmView) {
+        value.getElement().remove();
+        value.removeElement();
+      }
+    });
+
+    this._showMoreButtonComponent.getElement().remove();
+  }
+
+  _onSortTypeChange(sortType) {
+    if (this._currentSortType !== sortType) {
+      this._sortFilms(sortType);
+      this._clearFilms();
+
+      this._shownMoviesCount = SHOW_MOVIES_COUNT;
+
+      this._renderAllFilms();
+    }
   }
 
   _showMoreMovies(evt) {
@@ -137,7 +178,7 @@ export default class Content {
     const filmComponent = new FilmView(movie);
 
     filmComponent.setCardClickHandler((call) => {
-      if (call === FilmCardCalls.POPUP) {
+      if (call === FilmCardCall.POPUP) {
         this._showPopup(movie);
       } else {
         this._onButtonsClick(movie, call);
@@ -187,6 +228,10 @@ export default class Content {
   _renderAllFilms() {
     for (let i = 0; i < Math.min(this._movies.length, SHOW_MOVIES_COUNT); i++) {
       this._renderFilm(this._allMoviesSectionComponent.getContainer(), this._movies[i]);
+    }
+
+    if (this._movies.length > SHOW_MOVIES_COUNT) {
+      this._renderShowMoreButton();
     }
   }
 

@@ -47,9 +47,7 @@ export const getComments = (commentsId, commentsArray) => {
 
 export const getTopRatedMovies = (movies) => {
   const topRatedMovies = [];
-  const sortedMovies = [...movies].sort((a, b) => {
-    return Number(b.info.rating) - Number(a.info.rating);
-  });
+  const sortedMovies = [...movies].sort(sortByRating);
 
   for (const movie of sortedMovies) {
     if (Number(movie.info.rating)) {
@@ -73,4 +71,12 @@ export const getMostCommentedMovies = (movies) => {
   }
 
   return mostCommentedMovies;
+};
+
+export const sortByDate = (a, b) => {
+  return dayjs(b.info.releaseDate).diff(dayjs(a.info.releaseDate));
+};
+
+export const sortByRating = (a, b) => {
+  return Number(b.info.rating) - Number(a.info.rating);
 };

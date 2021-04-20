@@ -3,6 +3,7 @@ import Base from '../view/base.js';
 export const RenderPosition = {
   AFTERBEGIN: 'afterbegin',
   BEFOREEND: 'beforeend',
+  AFTER_ELEMENT: 'after-element',
 };
 
 export const render = (container, element, place) => {
@@ -13,12 +14,16 @@ export const render = (container, element, place) => {
   if (element instanceof Base) {
     element = element.getElement();
   }
+
   switch (place) {
     case RenderPosition.AFTERBEGIN:
       container.prepend(element);
       break;
     case RenderPosition.BEFOREEND:
       container.append(element);
+      break;
+    case RenderPosition.AFTER_ELEMENT:
+      container.after(element);
       break;
     default:
       container.append(element);
