@@ -155,6 +155,8 @@ export default class Content {
       this._onButtonsClick(movie, call);
     });
 
+    this._popupComponent.setEmojiChangeHandler();
+
     render(document.body, this._popupComponent);
     document.body.classList.add(HIDE_OVERFLOW_CLASS);
     document.addEventListener('keydown', this._onEscKeyDown);

@@ -1,6 +1,6 @@
 import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration} from '../utils/films.js';
-import BaseView from './base.js';
-import {FilmCardCall} from '../const.js';
+import SmartView from './smart.js';
+import {FilmCardCall, Emoji} from '../const.js';
 
 const createGenresTemplate = (genres) => {
   return genres.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('');
@@ -40,7 +40,7 @@ const createPopupTemplate = (film, commentsArray) => {
     actors,
     country,
   } = film.info;
-  const {comments} = film;
+  const {comments, isEmojiChecked, checkedEmoji, writtenComment} = film;
   const {watchlist, watched, favorite} = film.user;
   const genresTemplate = createGenresTemplate(genres);
   const commentsTemplate = createCommentsTemplate(commentsArray);
@@ -132,29 +132,36 @@ const createPopupTemplate = (film, commentsArray) => {
         </ul>
 
         <div class="film-details__new-comment">
-          <div class="film-details__add-emoji-label"></div>
+          <div class="film-details__add-emoji-label">
+            ${isEmojiChecked ? `<img src="images/emoji/${checkedEmoji}.png" width="55" height="55" alt="emoji-${checkedEmoji}">` : ''}
+          </div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" 
+            name="comment">${writtenComment ? writtenComment : ''}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" 
+            value="smile" ${checkedEmoji === Emoji.SMILE ? 'checked' : ''}>
             <label class="film-details__emoji-label" for="emoji-smile">
               <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" 
+            value="sleeping" ${checkedEmoji === Emoji.SLEEPING ? 'checked' : ''}>
             <label class="film-details__emoji-label" for="emoji-sleeping">
               <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" 
+            value="puke" ${checkedEmoji === Emoji.PUKE ? 'checked' : ''}>
             <label class="film-details__emoji-label" for="emoji-puke">
               <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" 
+            value="angry" ${checkedEmoji === Emoji.ANGRY ? 'checked' : ''}>
             <label class="film-details__emoji-label" for="emoji-angry">
               <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
             </label>
@@ -166,18 +173,19 @@ const createPopupTemplate = (film, commentsArray) => {
 </section>`;
 };
 
-export default class Popup extends BaseView{
+export default class Popup extends SmartView {
   constructor(film, commentsArray) {
     super();
 
-    this._film = film;
+    this._data = film;
     this._commentsArray = commentsArray;
     this._closeButtonClickHandler = this._closeButtonClickHandler.bind(this);
     this._controlsChangeHandler = this._controlsChangeHandler.bind(this);
+    this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
   }
 
   getTemplate() {
-    return createPopupTemplate(this._film, this._commentsArray);
+    return createPopupTemplate(this._data, this._commentsArray);
   }
 
   _closeButtonClickHandler(evt) {
@@ -200,5 +208,31 @@ export default class Popup extends BaseView{
   setControlsChangeHandler(callback) {
     this._callback.controlsChange = callback;
     this.getElement().querySelector('.film-details__controls').addEventListener('change', this._controlsChangeHandler);
+  }
+
+  _emojiChangeHandler(evt) {
+    if (evt.target.tagName === 'INPUT') {
+      evt.preventDefault();
+
+      const scrollTop = this.getElement().scrollTop;
+
+      this.updateData({
+        isEmojiChecked: true,
+        checkedEmoji: evt.target.value,
+        writtenComment: this.getElement().querySelector('.film-details__comment-input').value,
+      });
+
+      this.getElement().scrollTop = scrollTop;
+    }
+  }
+
+  setEmojiChangeHandler() {
+    this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emojiChangeHandler);
+  }
+
+  restoreHandlers() {
+    this.setCloseButtonClickHandler(this._callback.closeButtonClick);
+    this.setControlsChangeHandler(this._callback.controlsChange);
+    this.setEmojiChangeHandler();
   }
 }
