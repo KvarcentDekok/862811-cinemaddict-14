@@ -24,7 +24,7 @@ const createCommentsTemplate = (commentsArray) => {
   ).join('');
 };
 
-const createPopupTemplate = (film, commentsArray) => {
+const createPopupTemplate = (film, commentsArray, newComment) => {
   const {
     title,
     originalTitle,
@@ -40,7 +40,8 @@ const createPopupTemplate = (film, commentsArray) => {
     actors,
     country,
   } = film.info;
-  const {comments, isEmojiChecked, checkedEmoji, writtenComment} = film;
+  const {comments} = film;
+  const {isEmojiChecked, checkedEmoji, writtenComment} = newComment;
   const {watchlist, watched, favorite} = film.user;
   const genresTemplate = createGenresTemplate(genres);
   const commentsTemplate = createCommentsTemplate(commentsArray);
@@ -177,15 +178,21 @@ export default class Popup extends SmartView {
   constructor(film, commentsArray) {
     super();
 
-    this._data = film;
+    this._film = film;
     this._commentsArray = commentsArray;
+    this._newComment = {
+      isEmojiChecked: false,
+      checkedEmoji: undefined,
+      writtenComment: '',
+    };
+
     this._closeButtonClickHandler = this._closeButtonClickHandler.bind(this);
     this._controlsChangeHandler = this._controlsChangeHandler.bind(this);
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
   }
 
   getTemplate() {
-    return createPopupTemplate(this._data, this._commentsArray);
+    return createPopupTemplate(this._film, this._commentsArray, this._newComment);
   }
 
   _closeButtonClickHandler(evt) {
@@ -216,12 +223,11 @@ export default class Popup extends SmartView {
 
       const scrollTop = this.getElement().scrollTop;
 
-      this.updateData({
-        isEmojiChecked: true,
-        checkedEmoji: evt.target.value,
-        writtenComment: this.getElement().querySelector('.film-details__comment-input').value,
-      });
+      this._newComment.isEmojiChecked = true;
+      this._newComment.checkedEmoji = evt.target.value;
+      this._newComment.writtenComment = this.getElement().querySelector('.film-details__comment-input').value;
 
+      this.updateElement();
       this.getElement().scrollTop = scrollTop;
     }
   }

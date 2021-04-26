@@ -1,30 +1,6 @@
-import BaseVeiw from './base.js';
+import BaseView from './base.js';
 
-export default class Smart extends BaseVeiw {
-  constructor() {
-    super();
-
-    this._data = {};
-  }
-
-  updateData(update, justDataUpdating) {
-    if (!update) {
-      return;
-    }
-
-    this._data = Object.assign(
-      {},
-      this._data,
-      update,
-    );
-
-    if (justDataUpdating) {
-      return;
-    }
-
-    this.updateElement();
-  }
-
+export default class Smart extends BaseView {
   updateElement() {
     const prevElement = this.getElement();
     const parent = prevElement.parentElement;
