@@ -15,16 +15,24 @@ export const capitalize = (string) => {
   return `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
 };
 
-export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
+export const runOnKeys = (element, func, ...codes) => {
+  const pressed = new Set();
 
-  if (index === -1) {
-    return items;
-  }
+  element.addEventListener('keydown', (event) => {
+    pressed.add(event.code);
 
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
+    for (const code of codes) {
+      if (!pressed.has(code)) {
+        return;
+      }
+    }
+
+    pressed.clear();
+
+    func();
+  });
+
+  element.addEventListener('keyup', (event) => {
+    pressed.delete(event.code);
+  });
 };

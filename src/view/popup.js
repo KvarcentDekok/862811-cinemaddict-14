@@ -1,6 +1,8 @@
-import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration} from '../utils/films.js';
+import he from 'he';
+import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration, getComments} from '../utils/films.js';
 import SmartView from './smart.js';
 import {FilmCardCall, Emoji} from '../const.js';
+import {runOnKeys} from '../utils/common.js';
 
 const createGenresTemplate = (genres) => {
   return genres.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('');
@@ -13,18 +15,18 @@ const createCommentsTemplate = (commentsArray) => {
         <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-${comment.emotion}">
       </span>
       <div>
-        <p class="film-details__comment-text">${comment.comment}</p>
+        <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${comment.name}</span>
           <span class="film-details__comment-day">${humanizeCommentDate(comment.date)}</span>
-          <button class="film-details__comment-delete">Delete</button>
+          <button class="film-details__comment-delete" data-call="${FilmCardCall.DELETE}" data-id="${comment.id}">Delete</button>
         </p>
       </div>
     </li>`,
   ).join('');
 };
 
-const createPopupTemplate = (film, commentsArray, newComment) => {
+const createPopupTemplate = (film, allComments, newComment) => {
   const {
     title,
     originalTitle,
@@ -43,6 +45,7 @@ const createPopupTemplate = (film, commentsArray, newComment) => {
   const {comments} = film;
   const {isEmojiChecked, checkedEmoji, writtenComment} = newComment;
   const {watchlist, watched, favorite} = film.user;
+  const commentsArray = getComments(comments, allComments);
   const genresTemplate = createGenresTemplate(genres);
   const commentsTemplate = createCommentsTemplate(commentsArray);
 
@@ -139,7 +142,7 @@ const createPopupTemplate = (film, commentsArray, newComment) => {
 
           <label class="film-details__comment-label">
             <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" 
-            name="comment">${writtenComment ? writtenComment : ''}</textarea>
+            name="comment">${writtenComment ? he.encode(writtenComment) : ''}</textarea>
           </label>
 
           <div class="film-details__emoji-list">
@@ -175,11 +178,11 @@ const createPopupTemplate = (film, commentsArray, newComment) => {
 };
 
 export default class Popup extends SmartView {
-  constructor(film, commentsArray) {
+  constructor(film, allComments) {
     super();
 
-    this._film = film;
-    this._commentsArray = commentsArray;
+    this._data = film;
+    this._allComments = allComments;
     this._newComment = {
       isEmojiChecked: false,
       checkedEmoji: undefined,
@@ -188,11 +191,13 @@ export default class Popup extends SmartView {
 
     this._closeButtonClickHandler = this._closeButtonClickHandler.bind(this);
     this._controlsChangeHandler = this._controlsChangeHandler.bind(this);
+    this._deleteCommentClickHandler = this._deleteCommentClickHandler.bind(this);
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
+    this._addCommentHandler = this._addCommentHandler.bind(this);
   }
 
   getTemplate() {
-    return createPopupTemplate(this._film, this._commentsArray, this._newComment);
+    return createPopupTemplate(this._data, this._allComments, this._newComment);
   }
 
   _closeButtonClickHandler(evt) {
@@ -236,9 +241,60 @@ export default class Popup extends SmartView {
     this.getElement().querySelector('.film-details__emoji-list').addEventListener('change', this._emojiChangeHandler);
   }
 
+  _deleteCommentClickHandler(evt) {
+    if (evt.target.dataset.call === FilmCardCall.DELETE) {
+      evt.preventDefault();
+
+      const scrollTop = this.getElement().scrollTop;
+
+      this._callback.deleteCommentClick(evt.target.dataset.id);
+      this.getElement().scrollTop = scrollTop;
+    }
+  }
+
+  setDeleteCommentClickHandler(callback) {
+    this._callback.deleteCommentClick = callback;
+    this.getElement().querySelector('.film-details__comments-list').addEventListener('click', this._deleteCommentClickHandler);
+  }
+
+  _addCommentHandler() {
+    const commentData = new FormData(this._element.querySelector('.film-details__inner'));
+
+    if (commentData.get('comment') && commentData.get('comment-emoji')){
+      const scrollTop = this.getElement().scrollTop;
+
+      this._resetNewComment();
+      this._callback.addComment(commentData);
+      this.getElement().scrollTop = scrollTop;
+    }
+  }
+
+  setAddCommentHandler(callback) {
+    this._callback.addComment = callback;
+    runOnKeys(
+      this.getElement().querySelector('.film-details__comment-input'),
+      this._addCommentHandler,
+      'ControlRight', 'Enter',
+    );
+  }
+
   restoreHandlers() {
     this.setCloseButtonClickHandler(this._callback.closeButtonClick);
     this.setControlsChangeHandler(this._callback.controlsChange);
+    this.setDeleteCommentClickHandler(this._callback.deleteCommentClick);
+    this.setAddCommentHandler(this._callback.addComment);
     this.setEmojiChangeHandler();
+  }
+
+  updateComments(allComments) {
+    this._allComments = allComments;
+  }
+
+  _resetNewComment() {
+    this._newComment = {
+      isEmojiChecked: false,
+      checkedEmoji: undefined,
+      writtenComment: '',
+    };
   }
 }

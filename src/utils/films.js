@@ -12,7 +12,9 @@ export const getComponentFromDate = (date, component) => {
 export const humanizeDuration = (durationTime) => {
   dayjs.extend(duration);
 
-  return `${dayjs.duration(durationTime, 'minutes').hours()}h ${dayjs.duration(durationTime, 'minutes').minutes()}m`;
+  const durationTimeParse = dayjs.duration(durationTime, 'minutes');
+
+  return `${durationTimeParse.hours()}h ${durationTimeParse.minutes()}m`;
 };
 
 export const limitText = (text) => {

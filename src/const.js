@@ -5,6 +5,7 @@ export const FilmCardCall = {
   WATCHLIST: 'watchlist',
   WATCHED: 'watched',
   FAVORITE: 'favorite',
+  DELETE: 'delete',
 };
 
 export const SortType = {
@@ -18,4 +19,17 @@ export const Emoji = {
   SLEEPING: 'sleeping',
   PUKE: 'puke',
   ANGRY: 'angry',
+};
+
+export const UpdateType = {
+  PATCH: 'patch',
+  MINOR: 'minor',
+  MAJOR: 'major',
+};
+
+export const FilterType = {
+  ALL: 'all',
+  WATCHLIST: 'watchlist',
+  HISTORY: 'history',
+  FAVORITES: 'favorites',
 };

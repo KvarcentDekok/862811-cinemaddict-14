@@ -8,16 +8,17 @@ import MostCommentedSectionView from '../view/most-commented-section.js';
 import PopupView from '../view/popup.js';
 import NoFilmsView from '../view/no-films.js';
 import {render, replace} from '../utils/render.js';
-import {getComments, getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} from '../utils/films.js';
-import {updateItem} from '../utils/common.js';
-import {FilmCardCall, SortType} from '../const.js';
+import {getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} from '../utils/films.js';
+import {FilmCardCall, SortType, UpdateType, FilterType} from '../const.js';
+import {filter} from '../utils/filter.js';
+import {createComment} from '../utils/comment.js';
 
 const SHOW_MOVIES_COUNT = 5;
 const EXTRA_MOVIES_COUNT = 2;
 const HIDE_OVERFLOW_CLASS = 'hide-overflow';
 
 export default class Content {
-  constructor(contentParent) {
+  constructor(contentParent, moviesModel, commentsModel, filterModel) {
     this._contentParent = contentParent;
     this._shownMoviesCount = SHOW_MOVIES_COUNT;
     this._currentSortType = SortType.DEFAULT;
@@ -30,20 +31,27 @@ export default class Content {
     this._mostCommentedSectionComponent = new MostCommentedSectionView();
     this._noFilmsComponent = new NoFilmsView();
 
+    this._moviesModel = moviesModel;
+    this._commentsModel = commentsModel;
+    this._filterModel = filterModel;
+
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this._onFilmChange = this._onFilmChange.bind(this);
     this._onSortTypeChange = this._onSortTypeChange.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
   }
 
-  init(movies, comments) {
-    this._movies = movies.slice();
-    this._comments = comments.slice();
+  init() {
+    this._movies = this._getMovies();
+    this._comments = this._commentsModel.getComments().slice();
     this._topRatedMovies = getTopRatedMovies(this._movies);
     this._mostCommentedMovies = getMostCommentedMovies(this._movies);
-    this._sourcedMovies = movies.slice();
     this._movieComponents = {};
     this._movieComponents.topRated = {};
     this._movieComponents.mostCommented = {};
+
+    this._moviesModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
 
     this._renderContent();
   }
@@ -85,22 +93,29 @@ export default class Content {
     });
   }
 
-  _sortFilms(sortType) {
-    switch (sortType) {
-      case SortType.DATE:
-        this._movies.sort(sortByDate);
+  _handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this._replaceFilm(data);
         break;
-      case SortType.RATING:
-        this._movies.sort(sortByRating);
+      case UpdateType.MINOR:
+        this._movies = this._moviesModel.getMovies();
+        this._clearFilms();
+        this._renderAllFilms();
+        this._renderTopRatedFilms();
+        this._renderMostCommentedFilms();
         break;
-      default:
-        this._movies = this._sourcedMovies.slice();
+      case UpdateType.MAJOR:
+        this._movies = this._moviesModel.getMovies();
+        this._clearFilms({resetShownMoviesCount: true, resetSortType: true});
+        this._renderAllFilms();
+        this._renderTopRatedFilms();
+        this._renderMostCommentedFilms();
+        break;
     }
-
-    this._currentSortType = sortType;
   }
 
-  _clearFilms() {
+  _clearFilms({resetShownMoviesCount = false, resetSortType = false, onlyAllFilmsBlock = false} = {}) {
     Object.values(this._movieComponents).forEach((value) => {
       if (value instanceof FilmView) {
         value.getElement().remove();
@@ -108,13 +123,47 @@ export default class Content {
       }
     });
 
+    if (!onlyAllFilmsBlock) {
+      Object.values(this._movieComponents.mostCommented).forEach((value) => {
+        if (value instanceof FilmView) {
+          value.getElement().remove();
+          value.removeElement();
+        }
+      });
+
+      Object.values(this._movieComponents.topRated).forEach((value) => {
+        if (value instanceof FilmView) {
+          value.getElement().remove();
+          value.removeElement();
+        }
+      });
+
+      this._mostCommentedSectionComponent.getElement().remove();
+      this._topRatedSectionComponent.getElement().remove();
+    }
+
+    if (resetShownMoviesCount) {
+      this._shownMoviesCount = SHOW_MOVIES_COUNT;
+    }
+
+    if (resetSortType) {
+      const previousSorComponent = this._sortComponent;
+
+      this._sortComponent = new SortView();
+      this._currentSortType = SortType.DEFAULT;
+      replace(this._sortComponent, previousSorComponent);
+      this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
+      previousSorComponent.getElement().remove();
+      previousSorComponent.removeElement();
+    }
+
     this._showMoreButtonComponent.getElement().remove();
   }
 
   _onSortTypeChange(sortType) {
     if (this._currentSortType !== sortType) {
-      this._sortFilms(sortType);
-      this._clearFilms();
+      this._currentSortType = sortType;
+      this._clearFilms({onlyAllFilmsBlock: true});
 
       this._shownMoviesCount = SHOW_MOVIES_COUNT;
 
@@ -124,28 +173,27 @@ export default class Content {
 
   _showMoreMovies(evt) {
     const showMoreButton = evt.target;
+    const movies = this._getMovies();
 
     evt.preventDefault();
 
-    this._movies
+    movies
       .slice(this._shownMoviesCount, this._shownMoviesCount + SHOW_MOVIES_COUNT)
       .forEach((movie) => this._renderFilm(this._allMoviesSectionComponent.getContainer(), movie));
 
     this._shownMoviesCount += SHOW_MOVIES_COUNT;
 
-    if (this._shownMoviesCount >= this._movies.length) {
+    if (this._shownMoviesCount >= movies.length) {
       showMoreButton.remove();
     }
   }
 
   _showPopup(movie) {
-    const popupComments = getComments(movie.comments, this._comments);
-
     if (this._popupComponent) {
       this._closePopup();
     }
 
-    this._popupComponent = new PopupView(movie, popupComments);
+    this._popupComponent = new PopupView(movie, this._comments);
 
     this._popupComponent.setCloseButtonClickHandler(() => {
       this._closePopup();
@@ -153,6 +201,14 @@ export default class Content {
 
     this._popupComponent.setControlsChangeHandler((call) => {
       this._onButtonsClick(movie, call);
+    });
+
+    this._popupComponent.setDeleteCommentClickHandler((commentId) => {
+      this._onDeleteCommentClick(movie, commentId);
+    });
+
+    this._popupComponent.setAddCommentHandler((commentData) => {
+      this._onAddComment(movie, commentData);
     });
 
     this._popupComponent.setEmojiChangeHandler();
@@ -188,6 +244,21 @@ export default class Content {
     });
 
     return filmComponent;
+  }
+
+  _getMovies() {
+    const filterType = this._filterModel.getFilter();
+    const movies = this._moviesModel.getMovies().slice();
+    const filteredMovies = filter[filterType](movies);
+
+    switch (this._currentSortType) {
+      case SortType.DATE:
+        return filteredMovies.sort(sortByDate);
+      case SortType.RATING:
+        return filteredMovies.sort(sortByRating);
+    }
+
+    return filteredMovies;
   }
 
   _renderFilm(container, movie, options = {isTopRated: false, isMostCommented: false}) {
@@ -228,16 +299,20 @@ export default class Content {
   }
 
   _renderAllFilms() {
-    for (let i = 0; i < Math.min(this._movies.length, SHOW_MOVIES_COUNT); i++) {
-      this._renderFilm(this._allMoviesSectionComponent.getContainer(), this._movies[i]);
+    const movies = this._getMovies();
+
+    for (let i = 0; i < Math.min(movies.length, this._shownMoviesCount); i++) {
+      this._renderFilm(this._allMoviesSectionComponent.getContainer(), movies[i]);
     }
 
-    if (this._movies.length > SHOW_MOVIES_COUNT) {
+    if (movies.length > this._shownMoviesCount) {
       this._renderShowMoreButton();
     }
   }
 
   _renderTopRatedFilms() {
+    this._topRatedMovies = getTopRatedMovies(this._movies);
+
     render(this._contentComponent, this._topRatedSectionComponent);
 
     for (let i = 0; i < Math.min(this._topRatedMovies.length, EXTRA_MOVIES_COUNT); i++) {
@@ -246,6 +321,8 @@ export default class Content {
   }
 
   _renderMostCommentedFilms() {
+    this._mostCommentedMovies = getMostCommentedMovies(this._movies);
+
     render(this._contentComponent, this._mostCommentedSectionComponent);
 
     for (let i = 0; i < Math.min(this._mostCommentedMovies.length, EXTRA_MOVIES_COUNT); i++) {
@@ -260,11 +337,50 @@ export default class Content {
 
     const updatedMovie = Object.assign({}, movie, {user: userSettings});
 
-    this._onFilmChange(updatedMovie);
+    if (this._filterModel.getFilter() === FilterType.ALL) {
+      this._onFilmChange(UpdateType.PATCH, updatedMovie);
+    } else {
+      this._onFilmChange(UpdateType.MINOR, updatedMovie);
+    }
   }
 
-  _onFilmChange(updatedFilm) {
-    this._movies = updateItem(this._movies, updatedFilm);
+  _onFilmChange(updateType, updatedFilm) {
+    this._movies = this._moviesModel.updateMovie(updateType, updatedFilm);
     this._replaceFilm(updatedFilm);
+  }
+
+  _onDeleteCommentClick(movie, commentId) {
+    movie = this._movies.find((movieItem) => movieItem.id === movie.id);
+
+    const comments = movie.comments.filter((existedId) => String(existedId) !== String(commentId));
+    const updatedMovie = Object.assign(
+      {},
+      movie,
+      {comments});
+
+    this._moviesModel.updateMovie(UpdateType.MINOR, updatedMovie);
+    this._movies = this._moviesModel.getMovies();
+    this._popupComponent.updateData({comments});
+  }
+
+  _onAddComment(movie, commentData) {
+    movie = this._movies.find((movieItem) => movieItem.id === movie.id);
+
+    const comment = createComment(commentData);
+    const movieComments = movie.comments;
+
+    movieComments.push(comment.id);
+
+    const updatedMovie = Object.assign(
+      {},
+      movie,
+      {movieComments});
+
+    this._commentsModel.addComment(comment);
+    this._moviesModel.updateMovie(UpdateType.MINOR, updatedMovie);
+    this._movies = this._moviesModel.getMovies();
+    this._comments = this._commentsModel.getComments();
+    this._popupComponent.updateComments(this._commentsModel.getComments().slice());
+    this._popupComponent.updateData({movieComments});
   }
 }
