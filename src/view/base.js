@@ -1,4 +1,5 @@
 import {createElement} from '../utils/render.js';
+import {VISUALLY_HIDDEN_HTML_CLASS} from '../const.js';
 
 export default class Base {
   constructor() {
@@ -24,5 +25,13 @@ export default class Base {
 
   removeElement() {
     this._element = null;
+  }
+
+  show() {
+    this.getElement().classList.remove(VISUALLY_HIDDEN_HTML_CLASS);
+  }
+
+  hide() {
+    this.getElement().classList.add(VISUALLY_HIDDEN_HTML_CLASS);
   }
 }

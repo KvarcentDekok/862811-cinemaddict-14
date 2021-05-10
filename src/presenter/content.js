@@ -12,16 +12,19 @@ import {getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} fro
 import {FilmCardCall, SortType, UpdateType, FilterType} from '../const.js';
 import {filter} from '../utils/filter.js';
 import {createComment} from '../utils/comment.js';
+import {getDateNow} from '../utils/common.js';
 
 const SHOW_MOVIES_COUNT = 5;
 const EXTRA_MOVIES_COUNT = 2;
 const HIDE_OVERFLOW_CLASS = 'hide-overflow';
 
 export default class Content {
-  constructor(contentParent, moviesModel, commentsModel, filterModel) {
+  constructor(contentParent, moviesModel, commentsModel, filterModel, statsComponent) {
     this._contentParent = contentParent;
     this._shownMoviesCount = SHOW_MOVIES_COUNT;
     this._currentSortType = SortType.DEFAULT;
+
+    this.isShown = true;
 
     this._contentComponent = new ContentView();
     this._sortComponent = new SortView();
@@ -30,6 +33,7 @@ export default class Content {
     this._topRatedSectionComponent = new TopRatedSectionView();
     this._mostCommentedSectionComponent = new MostCommentedSectionView();
     this._noFilmsComponent = new NoFilmsView();
+    this._statsComponent = statsComponent;
 
     this._moviesModel = moviesModel;
     this._commentsModel = commentsModel;
@@ -54,6 +58,20 @@ export default class Content {
     this._filterModel.addObserver(this._handleModelEvent);
 
     this._renderContent();
+  }
+
+  show() {
+    this._contentComponent.show();
+    this._sortComponent.show();
+
+    this.isShown = true;
+  }
+
+  hide() {
+    this._contentComponent.hide();
+    this._sortComponent.hide();
+
+    this.isShown = false;
   }
 
   _renderContent() {
@@ -113,6 +131,8 @@ export default class Content {
         this._renderMostCommentedFilms();
         break;
     }
+
+    this._statsComponent.updateData({films: this._movies.filter((movie) => movie.user.watched)});
   }
 
   _clearFilms({resetShownMoviesCount = false, resetSortType = false, onlyAllFilmsBlock = false} = {}) {
@@ -334,6 +354,9 @@ export default class Content {
     const userSettings = Object.assign(movie.user);
 
     userSettings[call] = !userSettings[call];
+    if (call === FilmCardCall.WATCHED) {
+      userSettings.watchingDate = userSettings.watched ? getDateNow() : null;
+    }
 
     const updatedMovie = Object.assign({}, movie, {user: userSettings});
 
@@ -345,7 +368,8 @@ export default class Content {
   }
 
   _onFilmChange(updateType, updatedFilm) {
-    this._movies = this._moviesModel.updateMovie(updateType, updatedFilm);
+    this._moviesModel.updateMovie(updateType, updatedFilm);
+    this._movies = this._moviesModel.getMovies();
     this._replaceFilm(updatedFilm);
   }
 

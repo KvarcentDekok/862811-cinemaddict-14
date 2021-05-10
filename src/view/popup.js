@@ -2,7 +2,6 @@ import he from 'he';
 import {humanizeReleaseDate, humanizeCommentDate, humanizeDuration, getComments} from '../utils/films.js';
 import SmartView from './smart.js';
 import {FilmCardCall, Emoji} from '../const.js';
-import {runOnKeys} from '../utils/common.js';
 
 const createGenresTemplate = (genres) => {
   return genres.map((genre) => `<span class="film-details__genre">${genre}</span>`).join('');
@@ -257,25 +256,23 @@ export default class Popup extends SmartView {
     this.getElement().querySelector('.film-details__comments-list').addEventListener('click', this._deleteCommentClickHandler);
   }
 
-  _addCommentHandler() {
-    const commentData = new FormData(this._element.querySelector('.film-details__inner'));
+  _addCommentHandler(evt) {
+    if (evt.ctrlKey && evt.code === 'Enter') {
+      const commentData = new FormData(this._element.querySelector('.film-details__inner'));
 
-    if (commentData.get('comment') && commentData.get('comment-emoji')){
-      const scrollTop = this.getElement().scrollTop;
+      if (commentData.get('comment') && commentData.get('comment-emoji')){
+        const scrollTop = this.getElement().scrollTop;
 
-      this._resetNewComment();
-      this._callback.addComment(commentData);
-      this.getElement().scrollTop = scrollTop;
+        this._resetNewComment();
+        this._callback.addComment(commentData);
+        this.getElement().scrollTop = scrollTop;
+      }
     }
   }
 
   setAddCommentHandler(callback) {
     this._callback.addComment = callback;
-    runOnKeys(
-      this.getElement().querySelector('.film-details__comment-input'),
-      this._addCommentHandler,
-      'ControlRight', 'Enter',
-    );
+    this.getElement().querySelector('.film-details__comment-input').addEventListener('keydown', this._addCommentHandler);
   }
 
   restoreHandlers() {

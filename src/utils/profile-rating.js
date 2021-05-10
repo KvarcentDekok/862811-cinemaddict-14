@@ -20,7 +20,7 @@ ratingMap.set({
   to: Infinity,
 }, 'Movie Buff');
 
-export const generateProfileRating = (movies) => {
+export const calculateProfileRating = (movies) => {
   const watchedFilmsCount = movies.filter((movie) => movie.user.watched).length;
 
   for (const value of ratingMap) {

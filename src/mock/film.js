@@ -93,6 +93,7 @@ const generateCommentsId = () => {
 export const generateFilm = () => {
   const title = getRandomElementFromArray(titles);
   const releaseDate = dayjs(getRandomInteger(0, +dayjs())).format();
+  const watched = Boolean(getRandomInteger(0, 1));
 
   return {
     id: nanoid(),
@@ -114,8 +115,8 @@ export const generateFilm = () => {
     comments: generateCommentsId(),
     user: {
       watchlist: Boolean(getRandomInteger(0, 1)),
-      watched: Boolean(getRandomInteger(0, 1)),
-      watchingDate: dayjs(getRandomInteger(+dayjs(releaseDate), +dayjs())).format(),
+      watched,
+      watchingDate: watched ? dayjs(getRandomInteger(+dayjs().subtract(18, 'month'), +dayjs())).format() : null,
       favorite: Boolean(getRandomInteger(0, 1)),
     },
   };

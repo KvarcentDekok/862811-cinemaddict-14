@@ -4,12 +4,16 @@ import {UpdateType, FilterType} from '../const.js';
 import {filter} from '../utils/filter.js';
 
 export default class Filter {
-  constructor(filterContainer, filterModel, moviesModel) {
+  constructor(filterContainer, filterModel, moviesModel, contentPresenter, statsComponent, menuComponent) {
     this._filterContainer = filterContainer;
     this._filterModel = filterModel;
     this._moviesModel = moviesModel;
 
+    this._contentPresenter = contentPresenter;
+
     this._filterComponent = null;
+    this._statsComponent = statsComponent;
+    this._menuComponent = menuComponent;
 
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleFilterTypeChange = this._handleFilterTypeChange.bind(this);
@@ -35,16 +39,22 @@ export default class Filter {
     prevFilterComponent.removeElement();
   }
 
+  removeActiveClass() {
+    this._filterComponent.removeActiveClass();
+  }
+
   _handleModelEvent() {
     this.init();
   }
 
   _handleFilterTypeChange(filterType) {
-    if (this._filterModel.getFilter() === filterType) {
-      return;
+    if (this._filterModel.getFilter() !== filterType || !this._contentPresenter.isShown) {
+      this._filterModel.setFilter(UpdateType.MAJOR, filterType);
     }
 
-    this._filterModel.setFilter(UpdateType.MAJOR, filterType);
+    this._contentPresenter.show();
+    this._statsComponent.hide();
+    this._menuComponent.removeActiveClass();
   }
 
   _getFilters() {

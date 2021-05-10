@@ -1,6 +1,6 @@
 import {capitalize} from '../utils/common.js';
 import BaseView from './base.js';
-import {FilterType} from '../const';
+import {FilterType, NAVIGATION_ACTIVE_HTML_CLASS} from '../const';
 
 const createFilterTemplate = (filters, currentFilterType) => {
   const filterItemsTemplate = filters.map((filter) => createFilterItemTemplate(filter, currentFilterType)).join('');
@@ -14,7 +14,7 @@ const createFilterItemTemplate = (filter, currentFilterType) => {
   const {type, name, count} = filter;
 
   return `<a href="#${type}" 
-    class="main-navigation__item ${type === currentFilterType ? 'main-navigation__item--active' : ''}"
+    class="main-navigation__item ${type === currentFilterType ? NAVIGATION_ACTIVE_HTML_CLASS : ''}"
     data-type="${type}">
     ${capitalize(name)} ${type !== FilterType.ALL ? `<span class="main-navigation__item-count">${count}</span>` : ''}
 </a>`;
@@ -32,6 +32,14 @@ export default class Filter extends BaseView {
 
   getTemplate() {
     return createFilterTemplate(this._filters, this._currentFilter);
+  }
+
+  removeActiveClass() {
+    const filterButtons = this.getElement().querySelectorAll('.main-navigation__item');
+
+    for (let i = 0; i < filterButtons.length; i++) {
+      filterButtons[i].classList.remove(NAVIGATION_ACTIVE_HTML_CLASS);
+    }
   }
 
   _filterTypeChangeHandler(evt) {
