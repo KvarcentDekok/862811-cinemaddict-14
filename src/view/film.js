@@ -17,7 +17,7 @@ const createFilmTemplate = (film) => {
             <span class="film-card__duration">${humanizeDuration(runtime)}</span>
             <span class="film-card__genre">${genres[0]}</span>
           </p>
-          <img src="./images/posters/${poster}" alt="${title}" class="film-card__poster" data-call="${FilmCardCall.POPUP}">
+          <img src="./${poster}" alt="${title}" class="film-card__poster" data-call="${FilmCardCall.POPUP}">
           <p class="film-card__description">${limitText(description)}</p>
           <a class="film-card__comments" data-call="${FilmCardCall.POPUP}">${comments.length} comments</a>
           <div class="film-card__controls">

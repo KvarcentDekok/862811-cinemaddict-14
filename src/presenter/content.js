@@ -7,6 +7,7 @@ import TopRatedSectionView from '../view/top-rated-section.js';
 import MostCommentedSectionView from '../view/most-commented-section.js';
 import PopupView from '../view/popup.js';
 import NoFilmsView from '../view/no-films.js';
+import LoadingView from '../view/loading.js';
 import {render, replace} from '../utils/render.js';
 import {getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} from '../utils/films.js';
 import {FilmCardCall, SortType, UpdateType, FilterType} from '../const.js';
@@ -19,12 +20,14 @@ const EXTRA_MOVIES_COUNT = 2;
 const HIDE_OVERFLOW_CLASS = 'hide-overflow';
 
 export default class Content {
-  constructor(contentParent, moviesModel, commentsModel, filterModel, statsComponent) {
+  constructor(contentParent, moviesModel, commentsModel, filterModel, statsComponent, api) {
     this._contentParent = contentParent;
     this._shownMoviesCount = SHOW_MOVIES_COUNT;
     this._currentSortType = SortType.DEFAULT;
+    this._api = api;
 
     this.isShown = true;
+    this._isLoading = true;
 
     this._contentComponent = new ContentView();
     this._sortComponent = new SortView();
@@ -34,6 +37,7 @@ export default class Content {
     this._mostCommentedSectionComponent = new MostCommentedSectionView();
     this._noFilmsComponent = new NoFilmsView();
     this._statsComponent = statsComponent;
+    this._loadingComponent = new LoadingView();
 
     this._moviesModel = moviesModel;
     this._commentsModel = commentsModel;
@@ -46,10 +50,6 @@ export default class Content {
   }
 
   init() {
-    this._movies = this._getMovies();
-    this._comments = this._commentsModel.getComments().slice();
-    this._topRatedMovies = getTopRatedMovies(this._movies);
-    this._mostCommentedMovies = getMostCommentedMovies(this._movies);
     this._movieComponents = {};
     this._movieComponents.topRated = {};
     this._movieComponents.mostCommented = {};
@@ -75,6 +75,12 @@ export default class Content {
   }
 
   _renderContent() {
+    if (this._isLoading) {
+      render(this._contentParent, this._contentComponent);
+      render(this._contentComponent, this._loadingComponent);
+      return;
+    }
+
     if (this._movies.length) {
       this._renderContainers();
     } else {
@@ -87,6 +93,7 @@ export default class Content {
     this._renderSort();
     render(this._contentParent, this._contentComponent);
     render(this._contentComponent, this._allMoviesSectionComponent);
+
     this._renderAllFilms();
 
     if (this._topRatedMovies.length) {
@@ -129,6 +136,15 @@ export default class Content {
         this._renderAllFilms();
         this._renderTopRatedFilms();
         this._renderMostCommentedFilms();
+        break;
+      case UpdateType.INIT:
+        this._movies = this._getMovies();
+        this._topRatedMovies = getTopRatedMovies(this._movies);
+        this._mostCommentedMovies = getMostCommentedMovies(this._movies);
+        this._isLoading = false;
+        this._loadingComponent.getElement().remove();
+        this._loadingComponent.removeElement();
+        this._renderContent();
         break;
     }
 
@@ -257,7 +273,16 @@ export default class Content {
 
     filmComponent.setCardClickHandler((call) => {
       if (call === FilmCardCall.POPUP) {
-        this._showPopup(movie);
+        this._api.getComments(movie.id)
+          .then((comments) => {
+            this._commentsModel.setComments(comments);
+            this._comments = this._commentsModel.getComments().slice();
+            this._showPopup(movie);
+          })
+          .catch(() => {
+            this._comments = [];
+            this._showPopup(movie);
+          });
       } else {
         this._onButtonsClick(movie, call);
       }
@@ -368,9 +393,12 @@ export default class Content {
   }
 
   _onFilmChange(updateType, updatedFilm) {
-    this._moviesModel.updateMovie(updateType, updatedFilm);
-    this._movies = this._moviesModel.getMovies();
-    this._replaceFilm(updatedFilm);
+    this._api.updateMovie(updatedFilm)
+      .then((updatedFilm) => {
+        this._moviesModel.updateMovie(updateType, updatedFilm);
+        this._movies = this._moviesModel.getMovies();
+        this._replaceFilm(updatedFilm);
+      });
   }
 
   _onDeleteCommentClick(movie, commentId) {

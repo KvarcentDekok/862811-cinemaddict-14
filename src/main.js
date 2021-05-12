@@ -7,24 +7,21 @@ import FilterPresenter from './presenter/filter.js';
 import MoviesModel  from './model/movies.js';
 import CommentsModel  from './model/comments.js';
 import FilterModel from './model/filter.js';
-import {generateFilm} from './mock/film.js';
-import {generateComment} from './mock/comment.js';
 import {calculateProfileRating} from './utils/profile-rating';
 import {render} from './utils/render.js';
+import {UpdateType} from './const.js';
+import Api from './api.js';
 
-const ALL_MOVIES_COUNT = 20;
-const MAX_COMMENTS_COUNT = 5;
+const AUTHORIZATION = 'Basic 0J3QsNCy0LDQu9GM0L3Ri9C5';
+const END_POINT = 'https://14.ecmascript.pages.academy/cinemaddict';
 
-const movies = new Array(ALL_MOVIES_COUNT).fill().map(generateFilm);
-const comments = new Array(MAX_COMMENTS_COUNT).fill().map((value, index) => generateComment(index));
-const profileRating = calculateProfileRating(movies);
 const headerElement = document.querySelector('.header');
 const mainElement = document.querySelector('.main');
 const statisticsContainer = document.querySelector('.footer__statistics');
-const profileComponent = new ProfileView(profileRating);
+
+const api = new Api(END_POINT, AUTHORIZATION);
 const menuComponent = new MenuView();
-const statisticsComponent = new StatisticsView(movies.length);
-const statsComponent = new StatsView(movies.filter((movie) => movie.user.watched));
+const statsComponent = new StatsView([]);
 const moviesModel = new MoviesModel();
 const commentsModel = new CommentsModel();
 const filterModel = new FilterModel();
@@ -36,14 +33,8 @@ const onStatsClick = () => {
   filterPresenter.removeActiveClass();
 };
 
-moviesModel.setMovies(movies);
-commentsModel.setComments(comments);
-
 const contentPresenter =
-  new ContentPresenter(mainElement, moviesModel, commentsModel, filterModel, statsComponent);
-
-render(mainElement, menuComponent);
-menuComponent.setStatsClickHandler(onStatsClick);
+  new ContentPresenter(mainElement, moviesModel, commentsModel, filterModel, statsComponent, api);
 
 const filterPresenter = new FilterPresenter(
   menuComponent.getElement(),
@@ -54,10 +45,6 @@ const filterPresenter = new FilterPresenter(
   menuComponent,
 );
 
-if (movies.length) {
-  render(headerElement, profileComponent);
-}
-
 filterPresenter.init();
 contentPresenter.init();
 
@@ -67,5 +54,28 @@ statsComponent.setFiltersChangeHandler((period) => {
   statsComponent.show();
 });
 
-render(mainElement, statsComponent);
-render(statisticsContainer, statisticsComponent);
+api.getMovies()
+  .then((movies) => {
+    const profileRating = calculateProfileRating(movies);
+    const profileComponent = new ProfileView(profileRating);
+    const statisticsComponent = new StatisticsView(movies.length);
+
+    if (movies.length) {
+      render(headerElement, profileComponent);
+    }
+
+    render(mainElement, menuComponent);
+    menuComponent.setStatsClickHandler(onStatsClick);
+    moviesModel.setMovies(UpdateType.INIT, movies);
+    render(mainElement, statsComponent);
+    render(statisticsContainer, statisticsComponent);
+  })
+  .catch(() => {
+    const statisticsComponent = new StatisticsView(0);
+
+    render(mainElement, menuComponent);
+    menuComponent.setStatsClickHandler(onStatsClick);
+    moviesModel.setMovies(UpdateType.INIT, []);
+    render(mainElement, statsComponent);
+    render(statisticsContainer, statisticsComponent);
+  });

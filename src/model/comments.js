@@ -14,4 +14,18 @@ export default class Comments {
   addComment(comment) {
     this._comments.push(comment);
   }
+
+  static adaptToClient(comment) {
+    const adaptedComment = Object.assign(
+      {},
+      comment,
+      {
+        name: comment.author,
+      },
+    );
+
+    delete adaptedComment.author;
+
+    return adaptedComment;
+  }
 }
