@@ -43,8 +43,10 @@ export default class Filter extends BaseView {
   }
 
   _filterTypeChangeHandler(evt) {
-    evt.preventDefault();
-    this._callback.filterTypeChange(evt.target.dataset.type);
+    if (evt.target.classList.contains('main-navigation__item')) {
+      evt.preventDefault();
+      this._callback.filterTypeChange(evt.target.dataset.type);
+    }
   }
 
   setFilterTypeChangeHandler(callback) {

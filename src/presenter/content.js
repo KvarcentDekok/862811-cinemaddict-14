@@ -12,7 +12,6 @@ import {render, replace} from '../utils/render.js';
 import {getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} from '../utils/films.js';
 import {FilmCardCall, SortType, UpdateType, FilterType} from '../const.js';
 import {filter} from '../utils/filter.js';
-import {createComment} from '../utils/comment.js';
 import {getDateNow} from '../utils/common.js';
 
 const SHOW_MOVIES_COUNT = 5;
@@ -240,11 +239,21 @@ export default class Content {
     });
 
     this._popupComponent.setDeleteCommentClickHandler((commentId) => {
-      this._onDeleteCommentClick(movie, commentId);
+      this._popupComponent.setState({deletingCommentId: commentId});
+
+      return this._api.deleteComment(commentId)
+        .then(() => {
+          this._onDeleteCommentClick(movie, commentId);
+        });
     });
 
-    this._popupComponent.setAddCommentHandler((commentData) => {
-      this._onAddComment(movie, commentData);
+    this._popupComponent.setAddCommentHandler((comment) => {
+      this._popupComponent.setState({isAddingComment: true});
+
+      return this._api.addComment(comment, movie.id)
+        .then((comment) => {
+          this._onAddComment(movie, comment);
+        });
     });
 
     this._popupComponent.setEmojiChangeHandler();
@@ -415,10 +424,9 @@ export default class Content {
     this._popupComponent.updateData({comments});
   }
 
-  _onAddComment(movie, commentData) {
+  _onAddComment(movie, comment) {
     movie = this._movies.find((movieItem) => movieItem.id === movie.id);
 
-    const comment = createComment(commentData);
     const movieComments = movie.comments;
 
     movieComments.push(comment.id);

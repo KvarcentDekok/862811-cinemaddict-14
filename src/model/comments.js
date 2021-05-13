@@ -28,4 +28,18 @@ export default class Comments {
 
     return adaptedComment;
   }
+
+  static adaptToServer(comment) {
+    const adaptedComment = Object.assign(
+      {},
+      comment,
+      {
+        author: comment.name,
+      },
+    );
+
+    delete adaptedComment.name;
+
+    return adaptedComment;
+  }
 }
