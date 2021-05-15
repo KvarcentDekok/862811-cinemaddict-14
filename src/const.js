@@ -44,3 +44,8 @@ export const StatsFilter = {
   MONTH: 'month',
   YEAR: 'year',
 };
+
+export const StoreCategory = {
+  MOVIES: 'movies',
+  COMMENTS: 'comments',
+};

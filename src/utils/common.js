@@ -20,3 +20,7 @@ export const capitalize = (string) => {
 export const getDateNow = () => {
   return dayjs().format();
 };
+
+export const isOnline = () => {
+  return window.navigator.onLine;
+};

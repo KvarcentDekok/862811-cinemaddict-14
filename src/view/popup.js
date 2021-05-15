@@ -153,25 +153,25 @@ const createPopupTemplate = (film, allComments, newComment, states) => {
 
           <div class="film-details__emoji-list">
             <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" 
-            value="smile" ${checkedEmoji === Emoji.SMILE ? 'checked' : ''}>
+            value="smile" ${checkedEmoji === Emoji.SMILE ? 'checked' : ''} ${isAddingComment ? 'disabled' : ''}>
             <label class="film-details__emoji-label" for="emoji-smile">
               <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
             </label>
 
             <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" 
-            value="sleeping" ${checkedEmoji === Emoji.SLEEPING ? 'checked' : ''}>
+            value="sleeping" ${checkedEmoji === Emoji.SLEEPING ? 'checked' : ''} ${isAddingComment ? 'disabled' : ''}>
             <label class="film-details__emoji-label" for="emoji-sleeping">
               <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
             </label>
 
             <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" 
-            value="puke" ${checkedEmoji === Emoji.PUKE ? 'checked' : ''}>
+            value="puke" ${checkedEmoji === Emoji.PUKE ? 'checked' : ''} ${isAddingComment ? 'disabled' : ''}>
             <label class="film-details__emoji-label" for="emoji-puke">
               <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
             </label>
 
             <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" 
-            value="angry" ${checkedEmoji === Emoji.ANGRY ? 'checked' : ''}>
+            value="angry" ${checkedEmoji === Emoji.ANGRY ? 'checked' : ''} ${isAddingComment ? 'disabled' : ''}>
             <label class="film-details__emoji-label" for="emoji-angry">
               <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
             </label>
@@ -284,9 +284,10 @@ export default class Popup extends SmartView {
         const scrollTop = this.getElement().scrollTop;
         const comment = createComment(commentData);
 
-        this._resetNewComment();
+        this._newComment.writtenComment = this.getElement().querySelector('.film-details__comment-input').value;
         this._callback.addComment(comment)
           .then(() => {
+            this._resetNewComment();
             this.getElement().scrollTop = scrollTop;
             this.setState({isAddingComment: false});
           })

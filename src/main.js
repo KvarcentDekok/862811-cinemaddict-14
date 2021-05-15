@@ -10,16 +10,23 @@ import FilterModel from './model/filter.js';
 import {calculateProfileRating} from './utils/profile-rating';
 import {render} from './utils/render.js';
 import {UpdateType} from './const.js';
-import Api from './api.js';
+import Api from './api/api.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 
 const AUTHORIZATION = 'Basic 0J3QsNCy0LDQu9GM0L3Ri9C5';
 const END_POINT = 'https://14.ecmascript.pages.academy/cinemaddict';
+const STORE_PREFIX = 'cinemaddict-localstorage';
+const STORE_VER = 'v1';
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 
 const headerElement = document.querySelector('.header');
 const mainElement = document.querySelector('.main');
 const statisticsContainer = document.querySelector('.footer__statistics');
 
-const api = new Api(END_POINT, AUTHORIZATION);
+const apiClear = new Api(END_POINT, AUTHORIZATION);
+const store = new Store(STORE_NAME, window.localStorage);
+const api = new Provider(apiClear, store);
 const menuComponent = new MenuView();
 const statsComponent = new StatsView([]);
 const moviesModel = new MoviesModel();
@@ -79,3 +86,16 @@ api.getMovies()
     render(mainElement, statsComponent);
     render(statisticsContainer, statisticsComponent);
   });
+
+window.addEventListener('load', () => {
+  navigator.serviceWorker.register('/sw.js');
+});
+
+window.addEventListener('online', () => {
+  document.title = document.title.replace(' [offline]', '');
+  api.sync();
+});
+
+window.addEventListener('offline', () => {
+  document.title += ' [offline]';
+});
