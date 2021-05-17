@@ -15,12 +15,25 @@ export default class Store {
   setItems(items, category) {
     const store = this.getItems();
 
-    this._storage.setItem(
-      this._storeKey,
-      JSON.stringify(
-        Object.assign({}, store, {[category]: items}),
-      ),
-    );
+    let categoryData = store[category];
+
+    if (!categoryData) {
+      this._storage.setItem(
+        this._storeKey,
+        JSON.stringify(
+          Object.assign({}, store, {[category]: items}),
+        ),
+      );
+    } else {
+      categoryData = Object.assign({}, categoryData, items);
+
+      this._storage.setItem(
+        this._storeKey,
+        JSON.stringify(
+          Object.assign({}, store, {[category]: categoryData}),
+        ),
+      );
+    }
   }
 
   setItem(key, value, category) {

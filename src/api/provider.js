@@ -3,11 +3,6 @@ import CommentsModel from '../model/comments.js';
 import {isOnline} from '../utils/common.js';
 import {StoreCategory} from '../const.js';
 
-const getSyncedMovies = (items) => {
-  return items.filter(({success}) => success)
-    .map(({payload}) => payload.movie);
-};
-
 const createStoreStructure = (items) => {
   return items.reduce((acc, current) => {
     return Object.assign({}, acc, {
@@ -47,9 +42,15 @@ export default class Provider {
         });
     }
 
-    const storeMovies = Object.values(this._store.getItems()[StoreCategory.COMMENTS]);
+    const storeLocal = this._store.getItems()[StoreCategory.COMMENTS];
 
-    return Promise.resolve(storeMovies.map(CommentsModel.adaptToClient));
+    let store = [];
+
+    if (storeLocal) {
+      store = Object.values(storeLocal);
+    }
+
+    return Promise.resolve(store.map(CommentsModel.adaptToClient));
   }
 
   updateMovie(movie) {
@@ -94,7 +95,7 @@ export default class Provider {
 
       return this._api.sync(storeMovies)
         .then((response) => {
-          const updatedMovies = getSyncedMovies(response.updated);
+          const updatedMovies = response.updated;
 
           const items = createStoreStructure([...updatedMovies]);
 
