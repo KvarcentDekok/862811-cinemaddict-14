@@ -173,7 +173,7 @@ export default class Stats extends SmartView {
       period: StatsFilter.ALL_TIME,
     };
 
-    this._filtersChangeHandler = this._filtersChangeHandler.bind(this);
+    this._onFiltersChange = this._onFiltersChange.bind(this);
   }
 
   getTemplate() {
@@ -184,14 +184,14 @@ export default class Stats extends SmartView {
     renderChart(this.getElement().querySelector('.statistic__chart'), this._data);
   }
 
-  _filtersChangeHandler(evt) {
+  _onFiltersChange(evt) {
     evt.preventDefault();
     this._callback.filtersChange(evt.target.value);
   }
 
   setFiltersChangeHandler(callback) {
     this._callback.filtersChange = callback;
-    this.getElement().querySelector('.statistic__filters').addEventListener('change', this._filtersChangeHandler);
+    this.getElement().querySelector('.statistic__filters').addEventListener('change', this._onFiltersChange);
   }
 
   restoreHandlers() {

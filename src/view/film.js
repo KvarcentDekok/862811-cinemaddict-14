@@ -42,14 +42,14 @@ export default class Film extends BaseView {
     super();
 
     this._film = film;
-    this._cardClickHandler = this._cardClickHandler.bind(this);
+    this._onCardClick = this._onCardClick.bind(this);
   }
 
   getTemplate() {
     return createFilmTemplate(this._film);
   }
 
-  _cardClickHandler(evt) {
+  _onCardClick(evt) {
     if (evt.target.dataset.call) {
       evt.preventDefault();
       this._callback.cardClick(evt.target.dataset.call);
@@ -58,6 +58,6 @@ export default class Film extends BaseView {
 
   setCardClickHandler(callback) {
     this._callback.cardClick = callback;
-    this.getElement().addEventListener('click', this._cardClickHandler);
+    this.getElement().addEventListener('click', this._onCardClick);
   }
 }

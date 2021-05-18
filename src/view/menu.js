@@ -11,7 +11,7 @@ export default class Menu extends BaseView {
   constructor() {
     super();
 
-    this._statsClickHandler = this._statsClickHandler.bind(this);
+    this._onStatsClick = this._onStatsClick.bind(this);
   }
 
   getTemplate() {
@@ -22,7 +22,7 @@ export default class Menu extends BaseView {
     this.getElement().querySelector('.main-navigation__additional').classList.remove(NAVIGATION_ACTIVE_HTML_CLASS);
   }
 
-  _statsClickHandler(evt) {
+  _onStatsClick(evt) {
     evt.preventDefault();
     this._callback.statsClick();
     evt.target.classList.add(NAVIGATION_ACTIVE_HTML_CLASS);
@@ -30,6 +30,6 @@ export default class Menu extends BaseView {
 
   setStatsClickHandler(callback) {
     this._callback.statsClick = callback;
-    this.getElement().querySelector('.main-navigation__additional').addEventListener('click', this._statsClickHandler);
+    this.getElement().querySelector('.main-navigation__additional').addEventListener('click', this._onStatsClick);
   }
 }

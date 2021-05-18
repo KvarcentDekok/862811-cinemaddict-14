@@ -17,4 +17,8 @@ export default class Profile extends BaseView {
   getTemplate() {
     return createProfileTemplate(this._profileRating);
   }
+
+  updateRating(profileRating) {
+    this._profileRating = profileRating;
+  }
 }

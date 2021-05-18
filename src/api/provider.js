@@ -70,8 +70,7 @@ export default class Provider {
   addComment(comment, filmId) {
     if (isOnline()) {
       return this._api.addComment(comment, filmId)
-        .then((response) => {
-          const newComment = response.comments[response.comments.length - 1];
+        .then((newComment) => {
           this._store.setItem(newComment.id, CommentsModel.adaptToServer(newComment), StoreCategory.COMMENTS);
           return newComment;
         });

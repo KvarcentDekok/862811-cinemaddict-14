@@ -1,4 +1,3 @@
-import ProfileView from './view/profile.js';
 import MenuView from './view/menu.js';
 import StatisticsView from './view/statistics.js';
 import StatsView from './view/stats.js';
@@ -7,7 +6,6 @@ import FilterPresenter from './presenter/filter.js';
 import MoviesModel  from './model/movies.js';
 import CommentsModel  from './model/comments.js';
 import FilterModel from './model/filter.js';
-import {calculateProfileRating} from './utils/profile-rating';
 import {render} from './utils/render.js';
 import {UpdateType} from './const.js';
 import Api from './api/api.js';
@@ -41,7 +39,7 @@ const onStatsClick = () => {
 };
 
 const contentPresenter =
-  new ContentPresenter(mainElement, moviesModel, commentsModel, filterModel, statsComponent, api);
+  new ContentPresenter(mainElement, moviesModel, commentsModel, filterModel, statsComponent, api, headerElement);
 
 const filterPresenter = new FilterPresenter(
   menuComponent.getElement(),
@@ -63,13 +61,7 @@ statsComponent.setFiltersChangeHandler((period) => {
 
 api.getMovies()
   .then((movies) => {
-    const profileRating = calculateProfileRating(movies);
-    const profileComponent = new ProfileView(profileRating);
     const statisticsComponent = new StatisticsView(movies.length);
-
-    if (movies.length) {
-      render(headerElement, profileComponent);
-    }
 
     render(mainElement, menuComponent);
     menuComponent.setStatsClickHandler(onStatsClick);

@@ -8,20 +8,20 @@ export default class ShowMoreButton extends BaseView {
   constructor() {
     super();
 
-    this._buttonClickHandler = this._buttonClickHandler.bind(this);
+    this._onButtonClick = this._onButtonClick.bind(this);
   }
 
   getTemplate() {
     return createShowMoreButtonTemplate();
   }
 
-  _buttonClickHandler(evt) {
+  _onButtonClick(evt) {
     evt.preventDefault();
     this._callback.buttonClick(evt);
   }
 
   setButtonClickHandler(callback) {
     this._callback.buttonClick = callback;
-    this.getElement().addEventListener('click', this._buttonClickHandler);
+    this.getElement().addEventListener('click', this._onButtonClick);
   }
 }

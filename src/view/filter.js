@@ -27,7 +27,7 @@ export default class Filter extends BaseView {
     this._filters = filters;
     this._currentFilter = currentFilterType;
 
-    this._filterTypeChangeHandler = this._filterTypeChangeHandler.bind(this);
+    this._onFilterTypeChange = this._onFilterTypeChange.bind(this);
   }
 
   getTemplate() {
@@ -42,7 +42,7 @@ export default class Filter extends BaseView {
     }
   }
 
-  _filterTypeChangeHandler(evt) {
+  _onFilterTypeChange(evt) {
     if (evt.target.classList.contains('main-navigation__item')) {
       evt.preventDefault();
       this._callback.filterTypeChange(evt.target.dataset.type);
@@ -51,6 +51,6 @@ export default class Filter extends BaseView {
 
   setFilterTypeChangeHandler(callback) {
     this._callback.filterTypeChange = callback;
-    this.getElement().addEventListener('click', this._filterTypeChangeHandler);
+    this.getElement().addEventListener('click', this._onFilterTypeChange);
   }
 }

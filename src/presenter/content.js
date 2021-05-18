@@ -1,3 +1,4 @@
+import ProfileView from '../view/profile.js';
 import ContentView from '../view/content.js';
 import SortView from '../view/sort.js';
 import ShowMoreButtonView from '../view/show-more-button.js';
@@ -13,13 +14,14 @@ import {getMostCommentedMovies, getTopRatedMovies, sortByDate, sortByRating} fro
 import {FilmCardCall, SortType, UpdateType, FilterType} from '../const.js';
 import {filter} from '../utils/filter.js';
 import {getDateNow} from '../utils/common.js';
+import {calculateProfileRating} from '../utils/profile-rating.js';
 
 const SHOW_MOVIES_COUNT = 5;
 const EXTRA_MOVIES_COUNT = 2;
 const HIDE_OVERFLOW_CLASS = 'hide-overflow';
 
 export default class Content {
-  constructor(contentParent, moviesModel, commentsModel, filterModel, statsComponent, api) {
+  constructor(contentParent, moviesModel, commentsModel, filterModel, statsComponent, api, headerElement) {
     this._contentParent = contentParent;
     this._shownMoviesCount = SHOW_MOVIES_COUNT;
     this._currentSortType = SortType.DEFAULT;
@@ -37,6 +39,8 @@ export default class Content {
     this._noFilmsComponent = new NoFilmsView();
     this._statsComponent = statsComponent;
     this._loadingComponent = new LoadingView();
+
+    this._headerElement = headerElement;
 
     this._moviesModel = moviesModel;
     this._commentsModel = commentsModel;
@@ -81,6 +85,7 @@ export default class Content {
     }
 
     if (this._movies.length) {
+      render(this._headerElement, this._profileComponent);
       this._renderContainers();
     } else {
       render(this._contentParent, this._contentComponent);
@@ -121,6 +126,7 @@ export default class Content {
     switch (updateType) {
       case UpdateType.PATCH:
         this._replaceFilm(data);
+        this._updateRating();
         break;
       case UpdateType.MINOR:
         this._movies = this._moviesModel.getMovies();
@@ -128,6 +134,7 @@ export default class Content {
         this._renderAllFilms();
         this._renderTopRatedFilms();
         this._renderMostCommentedFilms();
+        this._updateRating();
         break;
       case UpdateType.MAJOR:
         this._movies = this._moviesModel.getMovies();
@@ -135,9 +142,11 @@ export default class Content {
         this._renderAllFilms();
         this._renderTopRatedFilms();
         this._renderMostCommentedFilms();
+        this._updateRating();
         break;
       case UpdateType.INIT:
         this._movies = this._getMovies();
+        this._profileComponent = new ProfileView(calculateProfileRating(this._movies));
         this._topRatedMovies = getTopRatedMovies(this._movies);
         this._mostCommentedMovies = getMostCommentedMovies(this._movies);
         this._isLoading = false;
@@ -442,5 +451,14 @@ export default class Content {
     this._comments = this._commentsModel.getComments();
     this._popupComponent.updateComments(this._commentsModel.getComments().slice());
     this._popupComponent.updateData({movieComments});
+  }
+
+  _updateRating() {
+    const profileRating = calculateProfileRating(this._movies);
+    const newProfileComponent = new ProfileView(profileRating);
+
+    this._headerElement.replaceChild(newProfileComponent.getElement(), this._profileComponent.getElement());
+
+    this._profileComponent = newProfileComponent;
   }
 }

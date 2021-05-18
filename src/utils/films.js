@@ -35,10 +35,10 @@ export const humanizeCommentDate = (date) => {
   return `${dayjs(date).toNow(true)} ago`;
 };
 
-export const getComments = (commentsId, commentsArray) => {
+export const getComments = (commentsId, commentsData) => {
   const comments = [];
 
-  for (const comment of commentsArray) {
+  for (const comment of commentsData) {
     if (commentsId.some((value) => value === comment.id)) {
       comments.push(comment);
     }

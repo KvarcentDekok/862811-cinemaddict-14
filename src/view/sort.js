@@ -13,7 +13,7 @@ export default class Sort extends BaseView {
   constructor() {
     super();
 
-    this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
+    this._onSortTypeChange = this._onSortTypeChange.bind(this);
   }
 
   getTemplate() {
@@ -34,7 +34,7 @@ export default class Sort extends BaseView {
     element.classList.add('sort__button--active');
   }
 
-  _sortTypeChangeHandler(evt) {
+  _onSortTypeChange(evt) {
     if (evt.target.dataset.sortType) {
       evt.preventDefault();
       this._callback.sortTypeChange(evt.target.dataset.sortType);
@@ -44,6 +44,6 @@ export default class Sort extends BaseView {
 
   setSortTypeChangeHandler(callback) {
     this._callback.sortTypeChange = callback;
-    this.getElement().addEventListener('click', this._sortTypeChangeHandler);
+    this.getElement().addEventListener('click', this._onSortTypeChange);
   }
 }
