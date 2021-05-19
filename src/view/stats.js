@@ -184,6 +184,10 @@ export default class Stats extends SmartView {
     renderChart(this.getElement().querySelector('.statistic__chart'), this._data);
   }
 
+  restoreHandlers() {
+    this.setFiltersChangeHandler(this._callback.filtersChange);
+  }
+
   _onFiltersChange(evt) {
     evt.preventDefault();
     this._callback.filtersChange(evt.target.value);
@@ -192,9 +196,5 @@ export default class Stats extends SmartView {
   setFiltersChangeHandler(callback) {
     this._callback.filtersChange = callback;
     this.getElement().querySelector('.statistic__filters').addEventListener('change', this._onFiltersChange);
-  }
-
-  restoreHandlers() {
-    this.setFiltersChangeHandler(this._callback.filtersChange);
   }
 }

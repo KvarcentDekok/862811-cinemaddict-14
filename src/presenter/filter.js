@@ -26,7 +26,7 @@ export default class Filter {
     const filters = this._getFilters();
     const prevFilterComponent = this._filterComponent;
 
-    this._filterComponent = new FilterView(filters, this._filterModel.getFilter());
+    this._filterComponent = new FilterView(filters, this._filterModel.get());
     this._filterComponent.setFilterTypeChangeHandler(this._handleFilterTypeChange);
 
     if (prevFilterComponent === null) {
@@ -43,22 +43,8 @@ export default class Filter {
     this._filterComponent.removeActiveClass();
   }
 
-  _handleModelEvent() {
-    this.init();
-  }
-
-  _handleFilterTypeChange(filterType) {
-    if (this._filterModel.getFilter() !== filterType || !this._contentPresenter.isShown) {
-      this._filterModel.setFilter(UpdateType.MAJOR, filterType);
-    }
-
-    this._contentPresenter.show();
-    this._statsComponent.hide();
-    this._menuComponent.removeActiveClass();
-  }
-
   _getFilters() {
-    const movies = this._moviesModel.getMovies();
+    const movies = this._moviesModel.get();
 
     return [
       {
@@ -82,5 +68,19 @@ export default class Filter {
         count: filter[FilterType.FAVORITES](movies).length,
       },
     ];
+  }
+
+  _handleModelEvent() {
+    this.init();
+  }
+
+  _handleFilterTypeChange(filterType) {
+    if (this._filterModel.get() !== filterType || !this._contentPresenter.isShown) {
+      this._filterModel.set(UpdateType.MAJOR, filterType);
+    }
+
+    this._contentPresenter.show();
+    this._statsComponent.hide();
+    this._menuComponent.removeActiveClass();
   }
 }

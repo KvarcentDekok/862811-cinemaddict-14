@@ -3,11 +3,11 @@ export default class Comments {
     this._comments = null;
   }
 
-  getComments() {
+  get() {
     return this._comments;
   }
 
-  setComments(comments) {
+  set(comments) {
     this._comments = comments;
   }
 

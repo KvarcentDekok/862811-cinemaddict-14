@@ -210,6 +210,47 @@ export default class Popup extends SmartView {
     return createPopupTemplate(this._data, this._allComments, this._newComment, this._states);
   }
 
+  restoreHandlers() {
+    this.setCloseButtonClickHandler(this._callback.closeButtonClick);
+    this.setControlsChangeHandler(this._callback.controlsChange);
+    this.setDeleteCommentClickHandler(this._callback.deleteCommentClick);
+    this.setAddCommentHandler(this._callback.addComment);
+    this.setEmojiChangeHandler();
+  }
+
+  updateComments(allComments) {
+    this._allComments = allComments;
+  }
+
+  _resetNewComment() {
+    this._newComment = {
+      isEmojiChecked: false,
+      checkedEmoji: undefined,
+      writtenComment: '',
+    };
+  }
+
+  setState({isAddingComment = false, deletingCommentId = null} = {}) {
+    const scrollTop = this.getElement().scrollTop;
+
+    this._states = {
+      isAddingComment,
+      deletingCommentId,
+    };
+
+    this.updateElement();
+
+    this.getElement().scrollTop = scrollTop;
+  }
+
+  _shake(callback, element) {
+    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    setTimeout(() => {
+      element.style.animation = '';
+      callback();
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
   _onCloseButtonClick(evt) {
     evt.preventDefault();
     this._callback.closeButtonClick();
@@ -277,7 +318,7 @@ export default class Popup extends SmartView {
   }
 
   _onAddComment(evt) {
-    if (evt.ctrlKey && evt.code === 'Enter') {
+    if ((evt.ctrlKey || evt.metaKey) && evt.code === 'Enter') {
       const commentData = new FormData(this._element.querySelector('.film-details__inner'));
 
       if (commentData.get('comment') && commentData.get('comment-emoji')){
@@ -304,46 +345,5 @@ export default class Popup extends SmartView {
   setAddCommentHandler(callback) {
     this._callback.addComment = callback;
     this.getElement().querySelector('.film-details__comment-input').addEventListener('keydown', this._onAddComment);
-  }
-
-  restoreHandlers() {
-    this.setCloseButtonClickHandler(this._callback.closeButtonClick);
-    this.setControlsChangeHandler(this._callback.controlsChange);
-    this.setDeleteCommentClickHandler(this._callback.deleteCommentClick);
-    this.setAddCommentHandler(this._callback.addComment);
-    this.setEmojiChangeHandler();
-  }
-
-  updateComments(allComments) {
-    this._allComments = allComments;
-  }
-
-  _resetNewComment() {
-    this._newComment = {
-      isEmojiChecked: false,
-      checkedEmoji: undefined,
-      writtenComment: '',
-    };
-  }
-
-  setState({isAddingComment = false, deletingCommentId = null} = {}) {
-    const scrollTop = this.getElement().scrollTop;
-
-    this._states = {
-      isAddingComment,
-      deletingCommentId,
-    };
-
-    this.updateElement();
-
-    this.getElement().scrollTop = scrollTop;
-  }
-
-  _shake(callback, element) {
-    element.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-    setTimeout(() => {
-      element.style.animation = '';
-      callback();
-    }, SHAKE_ANIMATION_TIMEOUT);
   }
 }

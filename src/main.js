@@ -65,7 +65,7 @@ api.getMovies()
 
     render(mainElement, menuComponent);
     menuComponent.setStatsClickHandler(onStatsClick);
-    moviesModel.setMovies(UpdateType.INIT, movies);
+    moviesModel.set(UpdateType.INIT, movies);
     render(mainElement, statsComponent);
     render(statisticsContainer, statisticsComponent);
   })
@@ -74,7 +74,7 @@ api.getMovies()
 
     render(mainElement, menuComponent);
     menuComponent.setStatsClickHandler(onStatsClick);
-    moviesModel.setMovies(UpdateType.INIT, []);
+    moviesModel.set(UpdateType.INIT, []);
     render(mainElement, statsComponent);
     render(statisticsContainer, statisticsComponent);
   });
